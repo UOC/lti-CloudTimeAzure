@@ -68,16 +68,44 @@ class Azure {
 		    // Instead of setLocation, you can use setAffinityGroup
 		    // to set an affinity group.
 
-		    $result = $serviceManagementRestProxy->createHostedService($name, $label, $options);
+		    $result = $serviceManagementRestProxy->x($name, $label, $options);
 		    echo $result;
 		}
-	catch(ServiceException $e){
-	    // Handle exception based on error codes and messages.
-	    // Error codes and messages are here: 
-	    // http://msdn.microsoft.com/en-us/library/windowsazure/ee460801
-	    $code = $e->getCode();
-	    $error_message = $e->getMessage();
-	    echo $code.": ".$error_message."<br />";
+		catch(ServiceException $e){
+		    // Handle exception based on error codes and messages.
+		    // Error codes and messages are here: 
+		    // http://msdn.microsoft.com/en-us/library/windowsazure/ee460801
+		    $code = $e->getCode();
+		    $error_message = $e->getMessage();
+		    echo $code.": ".$error_message."<br />";
+		}
 	}
-}
+
+	public function listHostedServices(){
+
+
+		try{
+			$serviceManagementRestProxy = ServicesBuilder::getInstance()->createServiceManagementService($this->connectionString);
+		    $listHostedServicesResult = $serviceManagementRestProxy->listHostedServices();
+
+			$hosted_services = $listHostedServicesResult->getHostedServices();
+
+			foreach($hosted_services as $hosted_service){
+			    echo "Service name: ".$hosted_service->getName()."<br />";
+			    echo "Management URL: ".$hosted_service->getUrl()."<br />";
+			    echo "Affinity group: ".$hosted_service->getAffinityGroup()."<br />";
+			    echo "Location: ".$hosted_service->getLocation()."<br />";
+			    echo "------<br />";
+			}
+		    
+		}
+		catch(ServiceException $e){
+		    // Handle exception based on error codes and messages.
+		    // Error codes and messages are here: 
+		    // http://msdn.microsoft.com/en-us/library/windowsazure/ee460801
+		    $code = $e->getCode();
+		    $error_message = $e->getMessage();
+		    echo $code.": ".$error_message."<br />";
+		}
+	}
 }

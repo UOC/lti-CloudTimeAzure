@@ -20,7 +20,7 @@ class Ltiprovider extends CI_Controller{
 		$dbLti = new mysqli($this->db->hostname, $this->db->username, $this->db->password, $this->db->database);
 		$db_connector = LTI_Data_Connector::getDataConnector('',$dbLti);
 		$tool = new LTI_Tool_Provider("doLaunch", $db_connector,$this);
-		$tool->execute();  
+		$tool->execute();
 		mysqli_close($dbLti);
 		
 	}
@@ -35,29 +35,22 @@ class Ltiprovider extends CI_Controller{
 		$userdata['email']      = $tool_provider->user->email;
 		$userdata['user_id']    = $tool_provider->user->getId();
 		$userdata['context_id'] = $_REQUEST['context_id'];
-		$userdata['launch_presentation_locale'] = $_REQUEST['launch_presentation_locale'];
+		// $userdata['launch_presentation_locale'] = $_REQUEST['launch_presentation_locale'];
 		$userdata['consumer_key'] = $tool_provider->consumer->getKey();
 
 		if($tool_provider->user->isAdmin() || $tool_provider->user->isStaff())
 			$userdata['is_teacher'] = true;
 		else
 			$userdata['is_teacher'] = false;
-
-		//lets create the user key
-		$userKey = $this->User->userKey($userdata['consumer_key'],$userdata['context_id'],$userdata['user_id']);	
-		$ok = false;
-
-		if(!$this->User->userExists($userKey)){
-			if($this->User->add($userKey,$userdata)){		
-				$ok = true;
-			}			 
-		}else{
-		 $ok = true;
-		}
 		
+		$userId = $this->User->userExists($userdata['consumer'],$userdata['context_id'],$userdata['user_id']);
+		if(!$userId){
+			$userId = $this->User->add($userdata);						 
+		}
+
 		//is all ok lets create the session for the user
-		if($ok){
-		 	if($this->User->createSession($userKey))
+		if($userId){			
+		 	if($this->User->createSession($userId))
 		 		redirect('/test');
 		 	else
 		 		show_error('Could not create session',200,'Error');
