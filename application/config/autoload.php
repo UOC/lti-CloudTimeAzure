@@ -72,7 +72,7 @@ $autoload['libraries'] = array('database','session','template');
 | offer multiple interchangeable driver options.
 |
 | Prototype:
-|
+|	
 |	$autoload['drivers'] = array('cache');
 */
 
@@ -88,7 +88,7 @@ $autoload['drivers'] = array();
 |	$autoload['helper'] = array('url', 'file');
 */
 
-$autoload['helper'] = array('html','form',"url","date");
+$autoload['helper'] = array('html','form',"url","date","language");
 
 
 /*
@@ -100,11 +100,11 @@ $autoload['helper'] = array('html','form',"url","date");
 |	$autoload['config'] = array('config1', 'config2');
 |
 | NOTE: This item is intended for use ONLY if you have created custom
-| config files.  Otherwise, leave it blank.
+| config files.  Otherwise, leave it blank.	
 |
 */
 
-$autoload['config'] = array();
+$autoload['config'] = array('');
 
 
 /*
@@ -137,4 +137,4 @@ $autoload['language'] = array();
 |	$autoload['model'] = array('first_model' => 'first');
 */
 
-$autoload['model'] = array('User');
+$autoload['model'] = array('User','Azure');

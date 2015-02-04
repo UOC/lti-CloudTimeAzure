@@ -82,22 +82,22 @@ class Azure {
 	}
 
 	public function listHostedServices(){
-
-
 		try{
 			$serviceManagementRestProxy = ServicesBuilder::getInstance()->createServiceManagementService($this->connectionString);
 		    $listHostedServicesResult = $serviceManagementRestProxy->listHostedServices();
-
 			$hosted_services = $listHostedServicesResult->getHostedServices();
 
 			foreach($hosted_services as $hosted_service){
-			    echo "Service name: ".$hosted_service->getName()."<br />";
-			    echo "Management URL: ".$hosted_service->getUrl()."<br />";
-			    echo "Affinity group: ".$hosted_service->getAffinityGroup()."<br />";
-			    echo "Location: ".$hosted_service->getLocation()."<br />";
-			    echo "------<br />";
-			}
-		    
+				echo "<pre>";
+				print_r($hosted_service);
+				echo "</pre>";
+				// echo "Deployment";
+			    // echo "Service name: ".$hosted_service->getName()."<br />";
+			    // echo "Management URL: ".$hosted_service->getUrl()."<br />";
+			    // echo "Affinity group: ".$hosted_service->getAffinityGroup()."<br />";
+			    // echo "Location: ".$hosted_service->getLocation()."<br />";
+			    // echo "------<br />";
+			}		   
 		}
 		catch(ServiceException $e){
 		    // Handle exception based on error codes and messages.
@@ -108,4 +108,38 @@ class Azure {
 		    echo $code.": ".$error_message."<br />";
 		}
 	}
-}
+
+	function roleInstancesStatus(){
+
+	try{
+			$serviceRuntimRestProxy = ServicesBuilder::getInstance()->createServiceManagementService($this->connectionString);
+		    $listRoles = $serviceRuntimRestProxy->getRoles();
+		    print_r($listRoles);
+		    exit;
+			$hosted_services = $listHostedServicesResult->getHostedServices();
+
+			foreach($hosted_services as $hosted_service){
+				echo "<pre>";
+				print_r($hosted_service);
+				echo "</pre>";
+				// echo "Deployment";
+			    // echo "Service name: ".$hosted_service->getName()."<br />";
+			    // echo "Management URL: ".$hosted_service->getUrl()."<br />";
+			    // echo "Affinity group: ".$hosted_service->getAffinityGroup()."<br />";
+			    // echo "Location: ".$hosted_service->getLocation()."<br />";
+			    // echo "------<br />";
+			}		   
+		}
+		catch(ServiceException $e){
+		    // Handle exception based on error codes and messages.
+		    // Error codes and messages are here: 
+		    // http://msdn.microsoft.com/en-us/library/windowsazure/ee460801
+		    $code = $e->getCode();
+		    $error_message = $e->getMessage();
+		    echo $code.": ".$error_message."<br />";
+		}
+	}
+
+
+
+}//end of class

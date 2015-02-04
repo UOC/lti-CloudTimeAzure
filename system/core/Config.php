@@ -292,6 +292,8 @@ class CI_Config {
 	public function base_url($uri = '', $protocol = NULL)
 	{
 		$base_url = $this->slash_item('base_url');
+		
+		
 
 		if (isset($protocol))
 		{
