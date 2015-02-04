@@ -1,3 +1,6 @@
+<?php defined('BASEPATH') OR exit('No direct script access allowed');
+
+?>
 <nav class="navbar navbar-default">
   <div class="container-fluid">
     <!-- Brand and toggle get grouped for better mobile display -->
@@ -12,10 +15,16 @@
     </div>    
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
-        <li class="active"><a href="#"><?=$this->lang->line('menu_home');?><span class="sr-only">(current)</span></a></li>
-        <li><a href="#"><?=$this->lang->line('menu_manage');?></a></li>
+        <li class="active"><a href="#"><?=lang('menu_home');?><span class="sr-only">(current)</span></a></li>        
         <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><?=$this->lang->line('menu_students');?> <span class="caret"></span></a>
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><?=lang('menu_manage');?><span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+            <li><a href="<?=site_url('/manage/vm_add')?>">Add Virtual Machines</a></li>            
+            <li><a href="<?=site_url('/manage/vm')?>">List Virtual Machines</a></li>            
+          </ul>
+        </li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><?=lang('menu_students');?> <span class="caret"></span></a>
           <ul class="dropdown-menu" role="menu">
             <li><a href="#">Action</a></li>
             <li><a href="#">Another action</a></li>

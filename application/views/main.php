@@ -1,9 +1,7 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-
 /**
  * Main template file
  */
-
 ?>
 <!DOCTYPE html>
 <html>
@@ -16,7 +14,6 @@
 </head>
 <body>
 <div class='container'>
-
 	<div class='row' id='header'>
 		<div class='col-md-10'>
 		 <?php $this->load->view("header");?>
@@ -25,7 +22,12 @@
 			<img  class='azureLogo' src='<?=base_url('/assets/img/windows_azure_logo.png')?>'>	
 		</div>
 	</div>
-
+	
+	<div class='row' id='content'>
+		<div class='col-md-12'>
+			<?=$contents?>
+		</div>
+	</div>
 </div>
 </body>
 </html>
