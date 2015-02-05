@@ -1,13 +1,12 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-echo "<h1>".lang("vm_add")."</h1>";
-		
+echo "<h1>".lang("vm_add")."</h1>";		
 ?>
 <p><?=lang("vm_will_be_created_at")?><b><?=CLOUDSERVICE?></b></p>
 <form>
   <div class="form-group">
     <label for="exampleInputEmail1"><?=lang('vm_name')?></label>
-    <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Enter <?=lang('vm_name')?>">
+    <input type="email" class="form-control" id="vm_name" placeholder="Enter <?=lang('vm_name')?>">
   </div>
   <div class="form-group">
     <label for="exampleInputPassword1">Password</label>

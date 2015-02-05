@@ -35,9 +35,11 @@ class Manage extends CI_Controller{
 	 * adds a new virtual machine
 	 */
 	function vm_add(){
+		// $this->Azure->getVMImages();
+		$this->Azure->addVM();
 		$this->template->load("main","vm_add",array());			
 	}
-	
+
 	
 
 

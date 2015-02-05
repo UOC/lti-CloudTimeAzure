@@ -19,4 +19,26 @@ class Azure extends CI_Model {
     }
 
 
+    /**
+     * Returns a list of all available virtual machine images.
+     */
+    function getVMImages(){
+    	return $this->azurerestclient->getVmImages();
+    }
+
+
+    /**
+     * Adds a new VM to windows azure
+     */
+    function addVM(){
+
+    	$add['vhd'] = "community-4-3379fadd-83e5-4dc7-8a20-2088af38d95b-1.vhd";
+    	
+    	$this->azurerestclient->addVM($add);
+    	
+
+
+    }
+
+
 }//end of class
