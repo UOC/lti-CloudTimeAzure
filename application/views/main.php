@@ -21,8 +21,7 @@
 		<div class='col-md-2'>
 			<img  class='azureLogo' src='<?=base_url('/assets/img/windows_azure_logo.png')?>'>	
 		</div>
-	</div>
-	
+	</div>	
 	<div class='row' id='content'>
 		<div class='col-md-12'>
 			<?=$contents?>

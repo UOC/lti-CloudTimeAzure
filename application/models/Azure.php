@@ -18,12 +18,11 @@ class Azure extends CI_Model {
     	return  $this->azurerestclient->getCLoudServices();
     }
 
-
     /**
      * Returns a list of all available virtual machine images.
      */
-    function getVMImages(){
-    	return $this->azurerestclient->getVmImages();
+    function getOSImages(){
+    	return $this->azurerestclient->getOSImages();
     }
 
 
@@ -31,14 +30,28 @@ class Azure extends CI_Model {
      * Adds a new VM to windows azure
      */
     function addVM(){
-
-    	$add['vhd'] = "community-4-3379fadd-83e5-4dc7-8a20-2088af38d95b-1.vhd";
-    	
-    	$this->azurerestclient->addVM($add);
-    	
-
-
+    	$add['vhd'] = "community-4-3379fadd-83e5-4dc7-8a20-2088af38d95b-1.vhd";    	
+    	$this->azurerestclient->addVM($add);    	
     }
+
+    /**
+     * Add a new VM Role
+     * https://msdn.microsoft.com/en-us/library/azure/jj157186.aspx#OSVirtualHardDisk
+     */
+    function addVMRole(){
+        $this->azurerestclient->addVMRole();
+    }
+
+    /**
+     * Return a list of deployments for a specific cloud service
+     */
+    function getDeployments(){
+        return $this->azurerestclient->getDeployments();
+    }
+
+
+
+    
 
 
 }//end of class

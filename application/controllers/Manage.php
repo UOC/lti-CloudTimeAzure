@@ -26,9 +26,24 @@ class Manage extends CI_Controller{
 	/**
 	 *  Lists all the virtual machines
 	 */
-	function vm(){
-		$cloudServices = $this->Azure->getCLoudServices();		
-		$this->template->load("main","vms",array("vms" => $cloudServices));		
+	function deployments(){
+		$result = $this->Azure->getDeployments();		
+		$this->template->load("main","deployments",array("deployments" => $result));		
+	}
+
+	/**
+	 * Lista all the available virtual machine images 
+	 */
+
+	function os_images(){
+
+		$result = $this->Azure->getOSImages();
+		// echo "<pre>";
+		// print_r($result);
+		// echo "</pre>";
+
+		$this->template->load("main","osimages",array("osimages" => $result));			
+
 	}
 
 	/**
@@ -36,8 +51,15 @@ class Manage extends CI_Controller{
 	 */
 	function vm_add(){
 		// $this->Azure->getVMImages();
-		$this->Azure->addVM();
+		// $this->Azure->addVM();
+		   // $this->Azure->addVMRole();
+		// $d = $this->Azure->getDeployments();
+		// echo "<pre>";
+		// print_r($d);
+		// echo "</pre>";
+
 		$this->template->load("main","vm_add",array());			
+
 	}
 
 	
