@@ -91,6 +91,8 @@ define('EXIT__AUTO_MAX', 125); // highest automatically-assigned error code
 define('AZURE_SUBSCRIPTION_ID','5766eae8-7895-4df4-ae26-916859e7e1c9');
 define('AZURE_CERTIFICATE','/vagrant/CERTS/azurecerts/mycert.pem');
 define('CLOUDSERVICE','cs-azure-lti');
+define('AZURE_MAXVMTOCREATE',50);
+define('AZURE_MEDIALINK','https://portalvhds71n9prl4byf1b.blob.core.windows.net/vhds/');
 
 
 

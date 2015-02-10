@@ -130,44 +130,47 @@ class azureRestClient{
         // $response = $this->client->send($request);
 
     }
-    function addVMRole(){
+
+    /**
+     * Adds a new VM role into an already created deployment on a cloudserhttps://msdn.microsoft.com/en-us/library/azure/jj157186.aspx
+     */
+    function addVMRole($data){
+        
         $body ='<PersistentVMRole xmlns="http://schemas.microsoft.com/windowsazure" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
-                  <RoleName>vm-azure-lti3</RoleName>
+                  <RoleName>'.$data['rolename'].'</RoleName>
                   <RoleType>PersistentVMRole</RoleType>                  
-                      <ConfigurationSets>
-                        <ConfigurationSet i:type="LinuxProvisioningConfigurationSet">
-                          <ConfigurationSetType>LinuxProvisioningConfiguration</ConfigurationSetType>
-                          <HostName>vm-linux-3</HostName>
-                          <UserName>azureLTI1_</UserName>
-                          <UserPassword>azureLTI1_</UserPassword>                                                   
-                        </ConfigurationSet>
-                      </ConfigurationSets>   
+                      <ConfigurationSets>';
+        if($data['os'] == 'linux'){
+            $body .= '<ConfigurationSet i:type="LinuxProvisioningConfigurationSet">
+                        <ConfigurationSetType>LinuxProvisioningConfiguration</ConfigurationSetType>
+                        <HostName>'.$data['hostname'].'</HostName>
+                        <UserName>'.$data['username'].'</UserName>
+                        <UserPassword>'.$data['password'].'</UserPassword>                                                   
+                    </ConfigurationSet>';
+        }
+        $body .='</ConfigurationSets>   
                       <OSVirtualHardDisk>
-                        <MediaLink>https://portalvhds71n9prl4byf1b.blob.core.windows.net/vhds/communityimages2.vhd</MediaLink>
-                        <SourceImageName>LAMP-Stack-5-5-17-0-dev-Ubuntu-14-04</SourceImageName>
-                        <OS>Linux</OS>
+                        <MediaLink>'.$data['medialink'].'</MediaLink>
+                        <SourceImageName>'.$data['sourceimagename'].'</SourceImageName>
+                        <OS>'.$data['os'].'</OS>
                       </OSVirtualHardDisk>                  
-                </PersistentVMRole>'; 
+                </PersistentVMRole>';     
 
-            try {
-                $response = $this->client->post('services/hostedservices/cs-azure-lti-2/deployments/Staging/roles', array("body" => $body));
-                echo "<pre>";
-                print_r($response);
-                echo "</pre>";
 
-                $xml = $response->xml();
-                echo "<pre>";
-                print_r($xml);
-                echo "</pre>";  
 
-                }catch (RequestException $e) {
-                    echo "<pre>";
-                    echo $e->getRequest() . "\n";
-                    if ($e->hasResponse()) {
-                        echo $e->getResponse() . "\n";
-                    }
-                    echo "</pre>";
-            }
+        try {
+           $response =  $this->client->post('services/hostedservices/'.$this->cloudServiceName.'/deployments/'.$this->deploymentName.'/roles', array("body" => $body));                        
+           if($response->getStatusCode() == "201" || $response->getStatusCode() == "202"){ 
+                $r = "Role created correctly at deployment";            
+            }else
+            $r = "status_code = ".$response->getStatusCode();
+        }catch (RequestException $e) {                
+                $r = $e->getRequest() . "\n";
+                if ($e->hasResponse()) {
+                    $r.= $e->getResponse() . "\n";
+                }           
+        }
+        return $r;
 
     }
 

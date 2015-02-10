@@ -24,3 +24,6 @@ $lang['osimages'] ="OS Images";
 $lang['osimages_label'] = "Label";
 $lang['osimages_label'] = "OS Description";
 $lang['osimages_selectone'] = "Select one OS image to view more details";
+
+$lang['select_os'] = "Select an Operating System";
+$lang['select_copies'] = "How many copies of this VM do you want?";

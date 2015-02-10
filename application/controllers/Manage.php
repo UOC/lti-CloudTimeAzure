@@ -6,6 +6,7 @@
 
 class Manage extends CI_Controller{
 	
+
 	public function __construct(){
         // Call the CI_Model constructor
         parent::__construct();
@@ -34,34 +35,42 @@ class Manage extends CI_Controller{
 	/**
 	 * Lista all the available virtual machine images 
 	 */
+	function os_images($id){
 
-	function os_images(){
+		$result = $this->Azure->getOSImages();		
 
-		$result = $this->Azure->getOSImages();
-		// echo "<pre>";
-		// print_r($result);
-		// echo "</pre>";
-
-		$this->template->load("main","osimages",array("osimages" => $result));			
+		if(!empty($id)){
+			$OSImageDetails = $this->Azure->getOSImageDetails($id);
+		}
+		$this->template->load("main","osimages",array("osimages" => $result,
+													  "osimagedetails" => $OSImageDetails,
+													  "selectedosimage" => $id));			
 
 	}
 
 	/**
-	 * adds a new virtual machine
+	 * adds a new virtual machine/s
 	 */
-	function vm_add(){
-		// $this->Azure->getVMImages();
-		// $this->Azure->addVM();
-		   // $this->Azure->addVMRole();
-		// $d = $this->Azure->getDeployments();
-		// echo "<pre>";
-		// print_r($d);
-		// echo "</pre>";
-
-		$this->template->load("main","vm_add",array());			
-
+	function vm_add(){		
+		//form sent to add a new vm 
+		$response = "";
+		if($this->input->post()){
+			$postData = $this->input->post();			
+			$response = $this->Azure->addVMRole($postData);
+			if($response['type'] == "success"){
+				redirect("manage/deployments");
+			}
+		}
+		$osimages = $this->Azure->getOSImages();
+		$this->template->load("main","vm_add",array("osimages" => $osimages,"response" => $response) );			
 	}
 
+	/**
+	 * syncs all the OSimages from the api into our DB
+	 */
+	function import_osmages(){
+		echo $this->Azure->importOSImages();
+	}
 	
 
 
