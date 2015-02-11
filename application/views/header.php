@@ -20,7 +20,7 @@
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><?=lang('menu_manage');?><span class="caret"></span></a>
           <ul class="dropdown-menu" role="menu">
             <li><a href="<?=site_url('/manage/vm_add')?>">Add Virtual Machines</a></li>            
-            <li><a href="<?=site_url('/manage/deployments')?>">List VM</a></li>            
+            <li><a href="<?=site_url('/manage/vm')?>">List VM</a></li>            
             <li><a href="<?=site_url('/manage/os_images')?>">List OS Images</a></li>            
           </ul>
         </li>

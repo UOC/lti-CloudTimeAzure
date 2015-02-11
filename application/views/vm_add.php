@@ -11,7 +11,7 @@ if(!empty($osimages)){
 echo "<h1>".lang("vm_add")."</h1>";		
 
 if(!empty($response)){
-  echo '<div class="alert alert-'.$response['type'].'" role="alert">'.$response['msg'].'</div>';  
+  echo '<div class="alert alert-'.$response['type'].'" role="alert">'.(string)$response['msg'].'</div>';  
 }
 
 ?>

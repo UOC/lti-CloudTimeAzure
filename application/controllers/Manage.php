@@ -27,9 +27,15 @@ class Manage extends CI_Controller{
 	/**
 	 *  Lists all the virtual machines
 	 */
-	function deployments(){
-		$result = $this->Azure->getDeployments();		
-		$this->template->load("main","deployments",array("deployments" => $result));		
+	function vm(){
+		$result = $this->Azure->getVMRoles();
+		
+		$body ='';
+		if($result['success']){
+			$body = $result['body'];
+		}
+
+		$this->template->load("main","vm",array("vms" => $body));		
 	}
 
 	/**
@@ -57,6 +63,10 @@ class Manage extends CI_Controller{
 		if($this->input->post()){
 			$postData = $this->input->post();			
 			$response = $this->Azure->addVMRole($postData);
+			echo "<pre>";
+			print_r($response);
+			echo "</pre>";
+
 			if($response['type'] == "success"){
 				redirect("manage/deployments");
 			}

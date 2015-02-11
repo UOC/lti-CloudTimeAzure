@@ -4,11 +4,46 @@
  */
 class Azure extends CI_Model {
 
+    var $cloudService;
+
     public function __construct()
     {
             // Call the CI_Model constructor
             parent::__construct();
-            $this->load->library("azureRestClient");
+            $coursename = "lti123";//TMP
+
+            $this->load->library("azureRestClient",array('cloudservice' =>"lti123") );
+            //check if the cloudservice for the course exists if not creates it            
+            if(!$this->checkCloudService($coursename)){                
+                if($this->addCloudService($coursename))
+                    redirect("error");                
+            }
+            
+            $this->cloudService = $coursename;                    
+    }
+
+    /**
+     * Checks if a cloudservice exists
+     */
+    function checkCloudService($name){
+        $result = $this->azurerestclient->checkCloudService($name);        
+        if($result['success']) return true;
+        return false;
+    }
+
+    /**
+     * Creates a cloudservice
+     */
+    function addCloudService($name){
+
+        $add['base64label'] = base64_encode(microtime());
+        $add['name'] = $name;        
+        $add['location'] ='West Europe';
+        $result = $this->azurerestclient->addCloudService($add);        
+        if($result['success']){
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -54,18 +89,32 @@ class Azure extends CI_Model {
 
         $sourceimagename = $this->getSourceImageName($data['osimage_id']);
         if(!empty($sourceimagename)){
-            $rand = $this->randString(5);
-            $add['rolename'] = 'vm-azure-rolename-'.$rand;
-            $add['hostname'] = 'vm-azure-hostname-'.$rand;
-            $add['username'] = 'test123';
-            $add['password'] = 'HolaHola1_';
-            $add['medialink'] = AZURE_MEDIALINK."vm-role-medialink-".$rand.".vhd";
-            $add['sourceimagename'] = $sourceimagename;
-            $add['os']    	        = $data['os'];        
-            return array("type" => "info" ,"msg" => $this->azurerestclient->addVMRole($add) );        
-        }
-        return array("type" => "error","msg" => "Could'nt find the source image name in DB");
-    	
+            // if($data['numtocreate'] > 1){
+                $rand = $this->randString(5);
+                $add['rolename'] = $this->cloudService."-".$rand;
+                $add['hostname'] = $this->cloudService."-".$rand;
+                $add['username'] = 'admin';
+                $add['password'] = 'HolaHola1_';
+                $add['medialink'] = AZURE_MEDIALINK."vm-role-medialink-".$rand.".vhd";
+                $add['sourceimagename'] = $sourceimagename;
+                $add['os']    	        = $data['os'];  
+                $add['externalport'] = rand(100,50000);
+            // }      
+
+            //ok before we add the new VM we need to check if we have a deployment on our cloudservice            
+            $deployments = $this->azurerestclient->getCloudServiceDeployments("production");
+            if($deployments['success']){
+                //TODO - Check that there is only 1 and is the one it should have
+                return array("type" => "info" ,"msg" => $this->azurerestclient->addVMRole($add) );                
+            }else{
+                //ok we have a cloudservice without a vm deployment , lets create our first vm together with a deployment
+                $add['name'] = $this->cloudService;
+                $add['label'] = $this->cloudService.$rand;                
+                return array("type" => "info" ,"msg" => $this->azurerestclient->addVMRoleDeployment($add) );                
+            }            
+        }        
+
+        return array("type" => "error","msg" => "Couldn't find the sourceimage name in DB");    	
     }
         
     /**
@@ -76,16 +125,14 @@ class Azure extends CI_Model {
         $result = $this->db->get_where("os_images",array("id" => $id));
         $row = $result->row(); 
         return $row->name;   
-
     }
 
     /**
      * Return a list of deployments for a specific cloud service
      */
-    function getDeployments(){
-        return $this->azurerestclient->getDeployments();
+    function getVMRoles(){
+        return $this->azurerestclient->getCloudServiceDeploymentRolesDetails();
     }
-
 
     /**
      * Imports the OSImages to os_images table 
