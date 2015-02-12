@@ -39,40 +39,34 @@ class Manage extends CI_Controller{
 	}
 
 	/**
-	 * Lista all the available virtual machine images 
+	 * List all the available virtual machine images 
 	 */
-	function os_images($id){
-
+	function os_images($id = 0){
 		$result = $this->Azure->getOSImages();		
-
+		$OSImageDetails = "";
 		if(!empty($id)){
 			$OSImageDetails = $this->Azure->getOSImageDetails($id);
 		}
 		$this->template->load("main","osimages",array("osimages" => $result,
 													  "osimagedetails" => $OSImageDetails,
 													  "selectedosimage" => $id));			
-
 	}
 
 	/**
 	 * adds a new virtual machine/s
 	 */
-	function vm_add(){		
+	function vm_add(){
 		//form sent to add a new vm 
 		$response = "";
 		if($this->input->post()){
 			$postData = $this->input->post();			
-			$response = $this->Azure->addVMRole($postData);
-			echo "<pre>";
-			print_r($response);
-			echo "</pre>";
-
-			if($response['type'] == "success"){
-				redirect("manage/deployments");
-			}
+			$response = $this->Azure->addVMRole($postData);			
+			// if($response['type'] == "success"){
+			// 	redirect("manage/vm");
+			// }
 		}
 		$osimages = $this->Azure->getOSImages();
-		$this->template->load("main","vm_add",array("osimages" => $osimages,"response" => $response) );			
+		$this->template->load("main","vm_add",array("osimages" => $osimages,"msg" => $response) );			
 	}
 
 	/**

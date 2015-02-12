@@ -7,77 +7,95 @@ use GuzzleHttp\Exception\RequestException;
 class azureRestClient{
 
     var $client;
-    var $azure_subscription_id;
-    var $azure_certificate;
+    var $subscriptionId;
+    var $azureCertificate;
     var $cloudServiceName;
     var $deploymentName;
+    var $certificate;
 
-    function __construct($params){                      
+    function __construct($params){             
+         $this->cloudServiceName = $params['cloudservice'];
+         $this->deploymentName   = $params['deploymentname'];
+         $this->subscriptionId   = $params['subscriptionid'];
+         $this->certificate   = $params['certificate'];        
          $this->doConnect();
-         $this->cloudServiceName = $params['cloudservice'];            
-         $this->deploymentName = 'lti123xigq9'; //TODO
-    }
-
-    function doConnect(){
-        $this->client = new GuzzleHttp\Client(
-            array('base_url' => 'https://management.core.windows.net/'.AZURE_SUBSCRIPTION_ID."/" ,
-                  'defaults' => array(
-                        'headers' => array('x-ms-version' => '2014-06-01','Content-Type' => 'application/xml'),
-                        'cert' => AZURE_CERTIFICATE                        
-                   )
-            )
-            );       
     }
 
     /**
-     * Lista all the locations available
+     * Connects to the service 
+     */
+    function doConnect(){
+        $this->client = new GuzzleHttp\Client(
+            array('base_url' => 'https://management.core.windows.net/'.$this->subscriptionId."/" ,
+                  'defaults' => array(
+                        'headers' => array('x-ms-version' => '2014-06-01','Content-Type' => 'application/xml'),
+                        'cert' => $this->certificate
+                   )
+            )
+            );
+        
+    }
+
+    /**
+     * List all the locations available
      */
     function listLocations(){
-        $response =  $this->client->get('locations');
-        $xml = $response->xml();
-        echo "<pre>";
-        print_r($xml);
-        echo "</pre>";        
+
+        $r = ['success' => true];
+        try{
+            $response =  $this->client->get('locations');
+            if($response->getStatusCode() == "202"){
+                $r['success'] = true;            
+                $r['body'] = $response->xml();
+             }                        
+        }catch (RequestException $e) {                
+            // echo $e->getRequest() . "\n";
+            if ($e->hasResponse()) {
+                $r['response'] = (string)$e->getResponse()->getBody();   
+            }                
+        }     
+     return $r;    
     }
 
     /**
      * Returns all windows azure CloudServices for the subscription
      */
-    function getCLoudServices(){
+    // function getCLoudServices(){
 
-        $response = $this->client->get("services/hostedservices");
-        $result = $response->xml();
-        $return = array();        
-        if(!empty($result)){
-            $a = 0;
-            foreach($result->HostedService as $k => $v){                
-                $return[$a]['name'] = (string)$v->ServiceName;
-                $return[$a]['location'] = (string)$v->HostedServiceProperties->Location;
-                $return[$a]['status'] = (string)$v->HostedServiceProperties->Status;
-                $a++;
-            }
-        }
-        return $return;
-    }
+    //     $response = $this->client->get("services/hostedservices");
+    //     $result = $response->xml();
+    //     $return = array();        
+    //     if(!empty($result)){
+    //         $a = 0;
+    //         foreach($result->HostedService as $k => $v){                
+    //             $return[$a]['name'] = (string)$v->ServiceName;
+    //             $return[$a]['location'] = (string)$v->HostedServiceProperties->Location;
+    //             $return[$a]['status'] = (string)$v->HostedServiceProperties->Status;
+    //             $a++;
+    //         }
+    //     }
+    //     return $return;
+    // }
 
 
     /**
      * returns an array with all available OS Images
      */
     function getOSImages(){
-        $return = [];
+        $r = ['success' => false];
         try {
             $response = $this->client->get("services/images");
-            $return = $response->xml();            
-            }catch (RequestException $e) {
-                echo "<pre>";
-                echo $e->getRequest() . "\n";
+            if($response->getStatusCode() == "200"){
+                $r['success'] = true;            
+                $r['body'] = $response->xml();
+            }
+        }catch (RequestException $e) {                
+                // echo $e->getRequest() . "\n";
                 if ($e->hasResponse()) {
-                    echo $e->getResponse() . "\n";
-                }
-                echo "</pre>";
-            }            
-         return $return;
+                    $r['response'] = (string)$e->getResponse()->getBody();   
+                }                
+            }     
+         return $r;
     }
 
     /**
@@ -128,21 +146,21 @@ class azureRestClient{
                 </Deployment>';         
 
         $r = ["success" => false];    
-
         try{
             $response = $this->client->post('services/hostedservices/'.$this->cloudServiceName.'/deployments', array("body" => $body));            
             if($response->getStatusCode() == "202"){
                 $r['success'] = true;            
-            }else
+            }
+
             $r = "status_code = ".$response->getStatusCode();
 
         }catch (RequestException $e) {
-            $r['request'] = $e->getRequest();
-            if($e->hasResponse()) {
-                $r['response'] = $e->getResponse();
+            // $r['request'] = $e->getRequest();
+
+            if($e->hasResponse()) {                
+                $r['response'] = (string)$e->getResponse()->getBody();   
             }
-        }
-        
+        }        
         return $r;
     }
 
@@ -184,7 +202,7 @@ class azureRestClient{
                         <OS>'.$data['os'].'</OS>
                 </OSVirtualHardDisk>                  
                 </PersistentVMRole>';   
-
+        error_log($body);
         $r = ["success" => false];   
         try {
            $response =  $this->client->post('services/hostedservices/'.$this->cloudServiceName.'/deployments/'.$this->deploymentName.'/roles', array("body" => $body));                        
@@ -194,77 +212,76 @@ class azureRestClient{
             $r['status_code'] = "status_code = ".$response->getStatusCode();
 
         }catch (RequestException $e) {                
-            $r['request'] = $e->getRequest();
+            //$r['request'] = $e->getRequest();
             if ($e->hasResponse()) {
-                $r['response'] = $e->getResponse();
-            }           
+                $r['response'] = (string)$e->getResponse()->getBody();                
+            }
         }
-
         return $r;
-
     }
 
     /**
      * Return all the VM deployments role info for a cloud service slot ( production or staging ) 
      */
-        function getCloudServiceDeploymentRolesDetails($slot = "production"){
+    function getCloudServiceDeploymentRolesDetails($slot = "production"){
 
-            $r = ['success' => false];
-            try {
-                $response = $this->client->get("services/hostedservices/".$this->cloudServiceName."/deploymentslots/".$slot);
-
-                if($response->getStatusCode() == "200"){ 
-                    $r['success'] = true;
-                    $r['body'] = [];
-                    $xml = $response->xml();                    
-                    if($xml){
-                        foreach($xml as $key => $value){
-                            $a = 0;
-                            foreach($value->RoleInstance as $ri){
-                                $r['body'][$a]['roleInfo'] = $ri;
-                                $r['body'][$a]['extraInfo'] = $this->getRole($ri->RoleName);
-                                $a++;
-                            }
-                        }            
-                    }
+        $r = ['success' => false];
+        try {
+            $response = $this->client->get("services/hostedservices/".$this->cloudServiceName."/deploymentslots/".$slot);
+            
+            if($response->getStatusCode() == "200"){ 
+                $r['success'] = true;
+                $r['body'] = [];
+                $xml = $response->xml();                    
+                if($xml){
+                    foreach($xml as $key => $value){
+                        $a = 0;
+                        foreach($value->RoleInstance as $ri){
+                            $r['body'][$a]['roleInfo'] = $ri;
+                            $r['body'][$a]['extraInfo'] = $this->getRole($ri->RoleName);
+                            $a++;
+                        }
+                    }            
                 }
-                $r['status_code'] = "status_code = ".$response->getStatusCode();
-                
-                }catch (RequestException $e) {                    
-
-                    $r['request'] =  $e->getRequest();
-                    if ($e->hasResponse()) {
-                        $r['response'] = $e->getResponse();
-                    }                    
             }
-
-            return $r;
+            $r['status_code'] = "status_code = ".$response->getStatusCode();
+            
+            }catch (RequestException $e) {                    
+                $r['request'] =  $e->getRequest();                          
+                if ($e->hasResponse()) {                
+                    $r['response'] = (string)$e->getResponse()->getBody();                
+                }                    
         }
 
-        /**
-         * Return all the VM deployments role info for a cloud service slot ( production or staging ) 
-         */
-        function getCloudServiceDeployments($slot = "production"){
+        return $r;
+    }
 
-            $r = ['success' => false];
-            try {
-                $response = $this->client->get("services/hostedservices/".$this->cloudServiceName."/deploymentslots/".$slot);
+    /**
+     * Return all the VM deployments role info for a cloud service slot ( production or staging ) 
+     */
+    function getCloudServiceDeployments($slot = "production"){
 
-                if($response->getStatusCode() == "200"){ 
-                    $r['success'] = true;
-                }
-                $r['status_code'] = "status_code = ".$response->getStatusCode();
-                
-                }catch (RequestException $e) {                    
+        $r = ['success' => false];
+        try {
+            $response = $this->client->get("services/hostedservices/".$this->cloudServiceName."/deploymentslots/".$slot);
 
-                    $r['request'] =  $e->getRequest();
-                    if ($e->hasResponse()) {
-                        $r['response'] = $e->getResponse();
-                    }                    
+            if($response->getStatusCode() == "200"){ 
+                $r['success'] = true;
             }
-
-            return $r;
+            $r['status_code'] = "status_code = ".$response->getStatusCode();
+            
+            }catch (RequestException $e) {                    
+                 $r['request'] =  $e->getRequest();        
+                 echo "<pre>";
+                 print_r($r); 
+                 echo "</pre>";        
+                if ($e->hasResponse()) {                    
+                    $r['response'] = (string)$e->getResponse()->getBody();     
+                }                    
         }
+
+        return $r;
+    }
 
     /**
      * Return info about a vm role 
@@ -277,9 +294,9 @@ class azureRestClient{
             $response = $this->client->get("services/hostedservices/".$this->cloudServiceName."/deployments/".$this->deploymentName."/roles/".$rolename);
             $r['body'] = $response->xml();        
         }catch (RequestException $e) {
-            $r['request'] = $e->getRequest();
+            // $r['request'] = $e->getRequest();
             if ($e->hasResponse()) {
-                $r['response'] =  $e->getResponse();
+                $r['response'] = (string)$e->getResponse()->getBody();     
             }            
         }
         return $r;
@@ -306,9 +323,9 @@ class azureRestClient{
             $r['status_code'] = $response->getStatusCode();
             
         }catch (RequestException $e) {
-            $r['request'] = $e->getRequest();
+            // $r['request'] = $e->getRequest();
             if ($e->hasResponse()) {
-                    $r['response'] = $e->getResponse();
+                    $r['response'] = (string)$e->getResponse()->getBody();     
             }
         }        
         return $r;
@@ -329,12 +346,41 @@ class azureRestClient{
             $r['status_code'] = $response->getStatusCode();                        
 
         }catch (RequestException $e) {
-            $r['request'] = $e->getRequest();
+            // $r['request'] = $e->getRequest();
             if ($e->hasResponse()) {
-                    $r['response'] = $e->getResponse();
+                $r['response'] = (string)$e->getResponse()->getBody();     
             }
         }
         return $r;
+    }
+
+    /**
+     *  Shutsdown a VM role
+     *  https://msdn.microsoft.com/en-us/library/azure/jj157195.aspx
+     */
+
+    function shutdownVMRole($vmrole){
+
+        
+        $body = '<ShutdownRoleOperation xmlns="http://schemas.microsoft.com/windowsazure" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+                  <OperationType>ShutdownRoleOperation</OperationType>
+                  <PostShutdownAction>StoppedDeallocated</PostShutdownAction>
+                </ShutdownRoleOperation>';
+        $r = ["success" => false];
+        try{
+            $response = $this->client->get("services/hostedservices/".$this->cloudServiceName."/deployments/".$this->deploymentName."/roleinstances/".$vmrole);
+            if($response->getStatusCode() == "202"){
+                $r['success'] = true;            
+            }
+
+        }catch (RequestException $e) {
+            // $r['request'] = $e->getRequest();
+            if ($e->hasResponse()) {
+                $r['response'] = (string)$e->getResponse()->getBody();     
+            }
+        }
+        return $r;
+
     }
 
 

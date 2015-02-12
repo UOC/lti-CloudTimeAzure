@@ -9,13 +9,11 @@ if(!empty($osimages)){
   }
 }
 echo "<h1>".lang("vm_add")."</h1>";		
-
-if(!empty($response)){
-  echo '<div class="alert alert-'.$response['type'].'" role="alert">'.(string)$response['msg'].'</div>';  
+if(!empty($msg)){
+  echo '<div class="alert alert-'.$msg['type'].'" role="alert">'.(string)$msg['msg'].'</div>';  
 }
-
 ?>
-<p><?=lang("vm_will_be_created_at")?><b><?=CLOUDSERVICE?></b></p>
+<p>Once you add a new Virtual Machine, it can take a few minutes until it will appear on the list of Virtual Machines.</p>
 <form action='<?=site_url('manage/vm_add')?>' method='POST'>  
   <div class="form-group">
     <label for="exampleInputFile"><?=lang("select_vm_image")?></label>
@@ -23,15 +21,9 @@ if(!empty($response)){
       <?=$options;?>
     </select>
     <p class="help-block">Select an virtual machine os image to use for this new VM .</p>
-  </div>
-  <div class="form-group">
-    <label for="exampleInputFile"><?=lang("select_os")?></label>
-    <select name='os' class="form-control">
-      <option value='windows'>Windows</option>
-      <option value='linux'>Linux</option>
-    </select>
-    <p class="help-block">It has to match the Virtual Machine image OS.</p> 
-  </div>
+  </div>  
+  <?php
+  /*
   <div class="form-group">
     <label for="exampleInputFile"><?=lang("select_copies")?></label>
     <select name='numtocreate' class="form-control">
@@ -39,9 +31,7 @@ if(!empty($response)){
       for($a =1;$a<=AZURE_MAXVMTOCREATE;$a++){
         echo "<option value='".$a."'>".$a."</option>";
       }?>
-    </select>
-    <p class="help-block">It has to match the Virtual Machine image OS.</p> 
-  </div>
-  
+    </select>    
+  </div>*/?>
   <button type="submit" class="btn btn-primary">Create</button>
 </form>

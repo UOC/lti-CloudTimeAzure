@@ -10,16 +10,18 @@ class Azure extends CI_Model {
     {
             // Call the CI_Model constructor
             parent::__construct();
-            $coursename = "lti123";//TMP
+            $this->cloudService = AZURE_CLOUDSERVICE;
 
-            $this->load->library("azureRestClient",array('cloudservice' =>"lti123") );
+            $this->load->library("azureRestClient",['cloudservice' => $this->cloudService,
+                                                    'deploymentname' => "lti123xigq9",
+                                                    'subscriptionid' => AZURE_SUBSCRIPTION_ID,
+                                                    'certificate' => AZURE_CERTIFICATE]);
+
             //check if the cloudservice for the course exists if not creates it            
-            if(!$this->checkCloudService($coursename)){                
-                if($this->addCloudService($coursename))
+            if(!$this->checkCloudService($this->cloudService)){                
+                if($this->addCloudService($this->cloudService))
                     redirect("error");                
             }
-            
-            $this->cloudService = $coursename;                    
     }
 
     /**
@@ -84,47 +86,58 @@ class Azure extends CI_Model {
     /**
      * Add a new VM Role
      * https://msdn.microsoft.com/en-us/library/azure/jj157186.aspx#OSVirtualHardDisk
+     * TODO : let it add more than 1 at the same time
      */
     function addVMRole($data){
 
-        $sourceimagename = $this->getSourceImageName($data['osimage_id']);
-        if(!empty($sourceimagename)){
+        $sourceimage = $this->getSourceImageDetails($data['osimage_id']);
+        if(!empty($sourceimage)){
             // if($data['numtocreate'] > 1){
-                $rand = $this->randString(5);
+                $rand = $this->randString(6);
                 $add['rolename'] = $this->cloudService."-".$rand;
                 $add['hostname'] = $this->cloudService."-".$rand;
                 $add['username'] = 'admin';
                 $add['password'] = 'HolaHola1_';
                 $add['medialink'] = AZURE_MEDIALINK."vm-role-medialink-".$rand.".vhd";
-                $add['sourceimagename'] = $sourceimagename;
-                $add['os']    	        = $data['os'];  
+                $add['sourceimagename'] = $sourceimage['name'];
+                $add['os']    	        = strtolower($sourceimage['os']);  
                 $add['externalport'] = rand(100,50000);
+
             // }      
 
             //ok before we add the new VM we need to check if we have a deployment on our cloudservice            
             $deployments = $this->azurerestclient->getCloudServiceDeployments("production");
-            if($deployments['success']){
-                //TODO - Check that there is only 1 and is the one it should have
-                return array("type" => "info" ,"msg" => $this->azurerestclient->addVMRole($add) );                
+            
+            if($deployments['success']){                
+                $result = $this->azurerestclient->addVMRole($add);
+                if($result['success']){
+                    $return = ['type' => 'success','msg' => "VM created"];
+                }else
+                    $return = ['type' => 'warning','msg' => isset($result['response']) ? $result['response'] : 'Error Creating VM Role with Deployment'];
+                
             }else{
                 //ok we have a cloudservice without a vm deployment , lets create our first vm together with a deployment
                 $add['name'] = $this->cloudService;
-                $add['label'] = $this->cloudService.$rand;                
-                return array("type" => "info" ,"msg" => $this->azurerestclient->addVMRoleDeployment($add) );                
-            }            
+                $add['label'] = $this->cloudService.$rand;                                
+                $result = $this->azurerestclient->addVMRoleDeployment($add);                
+                if($result['success']){
+                    $return = ['type' => 'success','msg' => "VM created"];
+                }else
+                    $return = ['type' => 'warning','msg' => isset($result['response']) ? $result['response'] : 'Error Creating VM'];
+                
+            }
+            return $return;            
         }        
-
         return array("type" => "error","msg" => "Couldn't find the sourceimage name in DB");    	
     }
         
+
     /**
      * Returns the os image name that we have on database 
      */
-    function getSourceImageName($id){
-        $this->db->select("name");
+    function getSourceImageDetails($id){        
         $result = $this->db->get_where("os_images",array("id" => $id));
-        $row = $result->row(); 
-        return $row->name;   
+        return $result->row_array();           
     }
 
     /**
@@ -161,9 +174,10 @@ class Azure extends CI_Model {
     function randString($length){
         $alphabet = "0123456789abcdefghijklmnopqrstuvwxyz";
           $s = "";
-          for ($i = 0; $i != $length; ++$i)
-            $s .= $alphabet[mt_rand(0, strlen($alphabet) - 1)];
-          return $s;
+            for ($i = 0; $i != $length; ++$i){
+                $s .= $alphabet[mt_rand(0, strlen($alphabet) - 1)];
+            }
+        return $s;
     }
 
 

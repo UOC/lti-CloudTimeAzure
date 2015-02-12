@@ -27,3 +27,7 @@ $lang['osimages_selectone'] = "Select one OS image to view more details";
 
 $lang['select_os'] = "Select an Operating System";
 $lang['select_copies'] = "How many copies of this VM do you want?";
+
+$lang['stop'] = "Stop/Shutdown";
+$lang['start'] =  "Start";
+$lang['assign_to_student'] ="Assign to student";
