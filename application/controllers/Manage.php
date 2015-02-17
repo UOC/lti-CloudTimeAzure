@@ -28,13 +28,11 @@ class Manage extends CI_Controller{
 	 *  Lists all the virtual machines
 	 */
 	function vm(){
-		$result = $this->Azure->getVMRoles();
-		
+		$result = $this->Azure->getVMRoles();		
 		$body ='';
 		if($result['success']){
 			$body = $result['body'];
 		}
-
 		$this->template->load("main","vm",array("vms" => $body));		
 	}
 
@@ -69,6 +67,32 @@ class Manage extends CI_Controller{
 		$this->template->load("main","vm_add",array("osimages" => $osimages,"msg" => $response) );			
 	}
 
+
+	/**
+	 * Stops/shutsdown a virtual machine
+	 * This should be called from ajax so we return a json
+	 */
+	function stopvm(){
+		if($this->input->post("rolename")){
+			$rolename  = $this->input->post("rolename");
+			$result = $this->Azure->shutdownVMRole($rolename);		
+			echo json_encode($result);
+		}
+	}
+
+	/**
+	 * Starts a virtual machine
+	 * This should be called from ajax so we return a json
+	 */
+	function startvm(){
+		if($this->input->post("rolename")){
+			$rolename  = $this->input->post("rolename");
+			$result = $this->Azure->startVMRole($rolename);
+			echo json_encode($result);
+		}
+	}
+
+
 	/**
 	 * syncs all the OSimages from the api into our DB
 	 */
@@ -76,6 +100,5 @@ class Manage extends CI_Controller{
 		echo $this->Azure->importOSImages();
 	}
 	
-
 
 }//end of class

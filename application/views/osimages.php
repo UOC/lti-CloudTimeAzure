@@ -13,15 +13,12 @@ echo "<h1>".lang("osimages")."</h1>";
 ?>
 <script>
 $(document).ready(function(){
-	$('#osimages').change(function(){
-		console.log("ahh");
-		var id = $(this).val();
-		console.log(id);
+	$('#osimages').change(function(){		
+		var id = $(this).val();		
 		window.location.href="<?=site_url('manage/os_images/"+id+"')?>";
 	})
 })
 </script>
-
 <div class="row">
 	<div class="col-md-12">
 	<form>

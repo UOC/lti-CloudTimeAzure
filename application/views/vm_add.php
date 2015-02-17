@@ -20,9 +20,9 @@ if(!empty($msg)){
     <select name='osimage_id' class="form-control">
       <?=$options;?>
     </select>
-    <p class="help-block">Select an virtual machine os image to use for this new VM .</p>
+    <p class="help-block">Select an virtual machine os image to use for this new VM.</p>
   </div>  
-  <?php
+<?php
   /*
   <div class="form-group">
     <label for="exampleInputFile"><?=lang("select_copies")?></label>

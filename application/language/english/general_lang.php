@@ -16,6 +16,13 @@ $lang['vm_ip'] = 'Ip address';
 $lang['vm'] = "Virtual Machine";
 $lang['vms'] = "Virtual Machines";
 $lang['vm_add'] = "Add a new Virtual Machine";
+$lang['vm_started'] = "Started";
+$lang['vm_starting'] = "Starting";
+$lang['vm_stopped'] = "Stopped";
+$lang['vm_stopping'] = "Stopping";
+$lang['vm_assigned'] = "Student assigned";
+
+$lang['os'] = "Operating system";
 
 $lang['vm_will_be_created_at'] = "Your virtual machine will be created inside the Cloud Service ";
 $lang['select_vm_image'] = "Select a virtual machine image";
@@ -31,3 +38,5 @@ $lang['select_copies'] = "How many copies of this VM do you want?";
 $lang['stop'] = "Stop/Shutdown";
 $lang['start'] =  "Start";
 $lang['assign_to_student'] ="Assign to student";
+
+$lang['refresh_page'] ="Refresh page";

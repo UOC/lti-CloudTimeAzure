@@ -167,6 +167,31 @@ class Azure extends CI_Model {
         }
         return $this->db->insert_batch("os_images",$insert,true);
     }
+    
+    /**
+     * Shutsdown a vm role
+     */
+    function shutdownVMRole($rolename){
+        $result = $this->azurerestclient->shutdownVMRole($rolename);
+        if($result['success']){
+            $msg = ['type' => 'success','msg' => 'VM has been shutdown correctly'];
+        }else
+            $msg = ['type' => 'warning','msg' => isset($result['response']) ? $result['response'] : 'There was a problem stopping down the VM'  ];
+
+        return $msg;
+    }
+    /**
+     * Starts a vm role
+     */
+    function startVMRole($rolename){
+        $result = $this->azurerestclient->startVMRole($rolename);        
+        if($result['success']){
+            $msg = ['type' => 'success','msg' => 'VM started correctly'];
+        }else
+            $msg = ['type' => 'warning','msg' => isset($result['response']) ? $result['response'] : 'There was a problem starting the VM' ];
+
+        return $msg;
+    }
 
     /**
      * makes a random string to specific lenght

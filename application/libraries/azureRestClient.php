@@ -360,7 +360,6 @@ class azureRestClient{
      */
 
     function shutdownVMRole($vmrole){
-
         
         $body = '<ShutdownRoleOperation xmlns="http://schemas.microsoft.com/windowsazure" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
                   <OperationType>ShutdownRoleOperation</OperationType>
@@ -368,11 +367,10 @@ class azureRestClient{
                 </ShutdownRoleOperation>';
         $r = ["success" => false];
         try{
-            $response = $this->client->get("services/hostedservices/".$this->cloudServiceName."/deployments/".$this->deploymentName."/roleinstances/".$vmrole);
+            $response = $this->client->post("services/hostedservices/".$this->cloudServiceName."/deployments/".$this->deploymentName."/roleinstances/".$vmrole."/Operations",array("body" => $body));
             if($response->getStatusCode() == "202"){
                 $r['success'] = true;            
             }
-
         }catch (RequestException $e) {
             // $r['request'] = $e->getRequest();
             if ($e->hasResponse()) {
@@ -380,8 +378,36 @@ class azureRestClient{
             }
         }
         return $r;
-
     }
+
+
+    /**
+     *  Starts a VM role
+     *  https://msdn.microsoft.com/en-us/library/azure/jj157189.aspx
+     */
+
+    function startVMRole($vmrole){
+        
+        $body = '<StartRoleOperation xmlns="http://schemas.microsoft.com/windowsazure" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+                    <OperationType>StartRoleOperation</OperationType>
+                </StartRoleOperation>';
+        $r = ["success" => false];
+        try{
+            $response = $this->client->post("services/hostedservices/".$this->cloudServiceName."/deployments/".$this->deploymentName."/roleinstances/".$vmrole."/Operations",array("body" => $body));
+            if($response->getStatusCode() == "202"){
+                $r['success'] = true;            
+            }
+        }catch (RequestException $e) {
+             $r['request'] = $e->getRequest();
+            if ($e->hasResponse()) {
+                $r['response'] = (string)$e->getResponse()->getBody();     
+            }
+        }
+        return $r;
+    }
+
+    
+
 
 
 }//end of class
