@@ -15,8 +15,8 @@ class User extends CI_Model {
      * Checks if the user exists or not, meaning that if they have come for the first time or not
      * return user id or false
      */
-    public function userExists($consumer,$contextId,$userId){
-    	$query = $this->db->get_where("user_data",array("consumer" => $consumer,"context_id" => $contextId,"lti_user_id" => $userId));
+    public function userExists($ltiUserId,$consumerInfoId){
+        $query = $this->db->get_where("user_data",array("lti_user_id" => $ltiUserId,"consumer_info_id" => $consumerInfoId));    	
 		if($query->num_rows() > 0){					
 			$row = $query->row();
 			return $row->id;
@@ -36,10 +36,10 @@ class User extends CI_Model {
     		$add['lastname'] = $data['lastname'];
     		$add['email'] = $data['email'];
     		$add['lang']  = $data['lang'];
-    		$add['role']  = $this->getRole( $data['is_teacher'] ? 'teacher' : 'student');
+    		$add['role']  = $data['is_teacher'] ? 'teacher' : 'student';
     		$add['consumer'] = $data['consumer'];
     		$add['context_id'] = $data['context_id'];
-    		$add['lti_user_id'] = $data['user_id'];
+    		$add['lti_user_id'] = $data['lti_user_id'];
     		return $this->db->insert("user_data",$add);
      	}
      	return true;//it was already there
@@ -50,25 +50,12 @@ class User extends CI_Model {
      * return object
      */
     public function getUserData($id){
-
     	$query = $this->db->get_where("user_data",array("id" => $id));
 		if($query->num_rows() > 0){
 			return  $query->row();			
 		}
 		return false;
     }
-
-
-    //returns the ID of the role name
-    public function getRole($role){    		
-		$query = $this->db->get_where("user_roles",array("name" => $role));
-		if($query->num_rows() > 0){
-			$row = $query->row();
-			return $row->id;
-		}
-		return false;
-    }
-
 
     /**
      * Create a session for the user
@@ -84,5 +71,17 @@ class User extends CI_Model {
     	}    	
     	return false;
     }    
+
+    /**
+     *  Return a list of all students     
+     */
+    public function getStudents(){
+
+        $query = $this->db->get_where("user_data",array("role" => "student"));
+        if($query->num_rows() > 0){
+            return  $query->result();          
+        }
+        return false;
+    }
 
 }

@@ -8,22 +8,28 @@ class Azure extends CI_Model {
 
     public function __construct()
     {
-            // Call the CI_Model constructor
-            parent::__construct();
-            $this->cloudService = AZURE_CLOUDSERVICE;
-
-            $this->load->library("azureRestClient",['cloudservice' => $this->cloudService,
-                                                    'deploymentname' => "lti123xigq9",
-                                                    'subscriptionid' => AZURE_SUBSCRIPTION_ID,
-                                                    'certificate' => AZURE_CERTIFICATE]);
-
-            //check if the cloudservice for the course exists if not creates it            
-            if(!$this->checkCloudService($this->cloudService)){                
-                if($this->addCloudService($this->cloudService))
-                    redirect("error");                
-            }
+        // Call the CI_Model constructor
+        parent::__construct();
+        $this->session->cloudservicename = "lti123";
+        
+        $this->load->library("azureRestClient",['cloudservice' => $this->session->cloudservicename,
+                                                'deploymentname' => "lti123xigq9",
+                                                'subscriptionid' => AZURE_SUBSCRIPTION_ID,
+                                                'certificate' => AZURE_CERTIFICATE]);        
+        $this->initCloudService($this->session->cloudservicename);
     }
 
+    /**
+     * Initialize the cloud service 
+     */
+    function initCloudService($name){        
+        //check if the cloudservice for the course exists if not creates it            
+        if(!$this->checkCloudService($name)){                
+            if($this->addCloudService($name))
+                die("Could not create cloud service ".$name); //TODO 
+        }
+        $this->cloudService = $name;
+    }
     /**
      * Checks if a cloudservice exists
      */
@@ -36,11 +42,11 @@ class Azure extends CI_Model {
     /**
      * Creates a cloudservice
      */
-    function addCloudService($name){
+    function addCloudService($name,$location = "West Europe"){
 
         $add['base64label'] = base64_encode(microtime());
         $add['name'] = $name;        
-        $add['location'] ='West Europe';
+        $add['location'] = $location;
         $result = $this->azurerestclient->addCloudService($add);        
         if($result['success']){
             return true;
@@ -101,13 +107,11 @@ class Azure extends CI_Model {
                 $add['medialink'] = AZURE_MEDIALINK."vm-role-medialink-".$rand.".vhd";
                 $add['sourceimagename'] = $sourceimage['name'];
                 $add['os']    	        = strtolower($sourceimage['os']);  
-                $add['externalport'] = rand(100,50000);
+                $add['externalport'] = rand(100,50000);//TODO we have to control this better to not have duplicates
 
             // }      
-
             //ok before we add the new VM we need to check if we have a deployment on our cloudservice            
-            $deployments = $this->azurerestclient->getCloudServiceDeployments("production");
-            
+            $deployments = $this->azurerestclient->getCloudServiceDeployments("production");            
             if($deployments['success']){                
                 $result = $this->azurerestclient->addVMRole($add);
                 if($result['success']){

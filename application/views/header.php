@@ -11,28 +11,10 @@
       <a class="navbar-brand" href="#"><img src="<?=base_url('/assets/img/marca_UOC_blanc_paper_small.png')?>"></a>
     </div>    
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-      <ul class="nav navbar-nav">        
-        <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><?=lang('menu_manage');?><span class="caret"></span></a>
-          <ul class="dropdown-menu" role="menu">
-            <li><a href="<?=site_url('/manage/vm_add')?>">Add Virtual Machines</a></li>            
+      <ul class="nav navbar-nav">                
+        <li><a href="<?=site_url('/manage/vm_add')?>">Add Virtual Machines</a></li>            
             <li><a href="<?=site_url('/manage/vm')?>">List VM</a></li>            
-            <li><a href="<?=site_url('/manage/os_images')?>">List OS Images</a></li>            
-          </ul>
-        </li>
-        <?php /*
-        <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><?=lang('menu_students');?> <span class="caret"></span></a>
-          <ul class="dropdown-menu" role="menu">
-            <li><a href="#">Action</a></li>
-            <li><a href="#">Another action</a></li>
-            <li><a href="#">Something else here</a></li>
-            <li class="divider"></li>
-            <li><a href="#">Separated link</a></li>
-            <li class="divider"></li>
-            <li><a href="#">One more separated link</a></li>
-          </ul>
-        </li> */?>
+            <li><a href="<?=site_url('/manage/os_images')?>">List OS Images</a></li>         
       </ul>         
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->

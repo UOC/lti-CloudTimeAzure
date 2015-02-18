@@ -32,10 +32,9 @@ class azureRestClient{
                         'cert' => $this->certificate
                    )
             )
-            );
-        
+            );        
     }
-
+    
     /**
      * List all the locations available
      */

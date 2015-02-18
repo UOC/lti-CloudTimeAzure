@@ -6,7 +6,6 @@
 
 class Manage extends CI_Controller{
 	
-
 	public function __construct(){
         // Call the CI_Model constructor
         parent::__construct();
@@ -33,7 +32,9 @@ class Manage extends CI_Controller{
 		if($result['success']){
 			$body = $result['body'];
 		}
-		$this->template->load("main","vm",array("vms" => $body));		
+		$students = $this->User->getStudents();
+		
+		$this->template->load("main","vm",array("vms" => $body,"students_list" => $students));		
 	}
 
 	/**

@@ -37,26 +37,47 @@ class Ltiprovider extends CI_Controller{
 		$userdata['context_id'] = $_REQUEST['context_id'];
 		// $userdata['launch_presentation_locale'] = $_REQUEST['launch_presentation_locale'];
 		$userdata['consumer_key'] = $tool_provider->consumer->getKey();
-
-		if($tool_provider->user->isAdmin() || $tool_provider->user->isStaff())
-			$userdata['is_teacher'] = true;
-		else
-			$userdata['is_teacher'] = false;
 		
-		$userId = $this->User->userExists($userdata['consumer'],$userdata['context_id'],$userdata['user_id']);
-		if(!$userId){
-			$userId = $this->User->add($userdata);						 
+		$nameForCloudService = "lti123";
+
+		//we will save the consumer_key and context_id on a table
+		$consumer_info = $this->Lti->getConsumer($userdata['consumer_key'],$userdata['context_id']);
+		if( !$consumer_info ){
+			//if is not added , then we can create it.
+			$consumer_info = $this->Lti->addConsumer($userdata['consumer_key'],$userdata['context_id']);
+			// TODO - send to error if not created			
 		}
 
+		if(!$consumer_info) die("Error: Couldn't add consumer info."); //we need this to continue
+
+		$userdata['consumer_info_id'] = $consumer_info->id;
+
+		if($tool_provider->user->isAdmin() || $tool_provider->user->isStaff()){
+			$userdata['is_teacher'] = true;
+			//lets check if there is a cloudservice for this course
+			if(!$this->Azure->checkCloudService($nameForCloudService)){
+				if( !$this->Azure->addCloudService($nameForCloudService)){
+					die("Error: Couldn't add a new Cloud Service for this consumer.");
+				}
+			}
+		}else{
+			$userdata['is_teacher'] = false;
+		}		
+
+		$userId = $this->User->userExists($userdata['user_id'],$consumer_info->id);
+		if(!$userId){
+			$userId = $this->User->add($userdata);
+		}
+		$this->session->cloudservicename = $nameForCloudService;
 		//is all ok lets create the session for the user
 		if($userId){			
 		 	if($this->User->createSession($userId))
-		 		redirect('/test');
+		 		redirect('/manage');
 		 	else
-		 		show_error('Could not create session',200,'Error');
+		 		die('Could not create session');
 		}
 
-	show_error('Could not create user',200,'Error');
+		die('Could not add user');
 }
 	
 }

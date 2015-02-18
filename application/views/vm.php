@@ -1,5 +1,7 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
+
+
 $table = "No VM's available";
 
 if(!empty($vms)){
@@ -42,10 +44,43 @@ echo $table;
 
 <div id='msg' >
 </div>
+<!-- Modal to assing a user to a virtual machine. -->
+<div class="modal fade" id="student_assign_modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title"><?=lang("assign_to_student");?></h4>
+      </div>
+      <div class="modal-body">
+        <form>
+        <!-- Lists of all the students without a vm	 -->
+        <select name='student_list'>
+        <?php
+        if(!empty($students_list)){
+        	foreach($students_list as $key => $val){
+        		echo "<option value='".$val->id."'>".$val->firstname. " ".$val->lastname."</option>";
+        	}
+        }
+        ?>	
+        </select>	
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 
 <script>
-
 $(document).ready(function(){
+	$(".assignstudent").click(function(){
+
+		$("#student_assign_modal").modal('show');
+
+	})
 
 	// Stops/shutsdown a VM role
 	$(".stop").click(function(){
