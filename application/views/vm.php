@@ -1,6 +1,12 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
+//lets get all the users that have a role from the $students_list array
 
+if(!empty($students_list)){
+	foreach($students_list as $key => $val){
+		$options_for_students_list = "<option value='".$val->id."'>".$val->firstname. " ".$val->lastname."</option>";
+	}
+}
 
 $table = "No VM's available";
 
@@ -18,13 +24,12 @@ if(!empty($vms)){
 		if($value['roleInfo']->PowerState == "Stopped")
 			$icon = '<span class="glyphicon glyphicon-stop red"></span>';
 
-
 		$table.="<tr class='".$value['roleInfo']->RoleName."'><td>".$value['roleInfo']->RoleName."</td>				
 				<td><div class='status'>".$icon."&nbsp;&nbsp;".$value['roleInfo']->PowerState."</div></td>
 				<td>".$value['extraInfo']['body']->OSVirtualHardDisk->SourceImageName."</td>
 				<td>".$value['extraInfo']['body']->OSVirtualHardDisk->OS."</td>";
 
-		$table .= "<td>Not assigned</td>";					
+		$table .= "<td class='td_student'>Not assigned</td>";					
 		$table .= '<td><div class="dropdown">
 					  <button id="dLabel" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 					    Actions
@@ -41,7 +46,6 @@ if(!empty($vms)){
 echo "<h1>".lang("vms")."</h1>";
 echo $table;
 ?>
-
 <div id='msg' >
 </div>
 <!-- Modal to assing a user to a virtual machine. -->
@@ -54,33 +58,50 @@ echo $table;
       </div>
       <div class="modal-body">
         <form>
-        <!-- Lists of all the students without a vm	 -->
-        <select name='student_list'>
-        <?php
-        if(!empty($students_list)){
-        	foreach($students_list as $key => $val){
-        		echo "<option value='".$val->id."'>".$val->firstname. " ".$val->lastname."</option>";
-        	}
-        }
-        ?>	
-        </select>	
+	        <!-- Lists of all the students without a vm	 -->
+	        <select id='students_list' name='student_list' class="form-control">
+	        <?php
+	        if(!empty($students_list)){
+	        	foreach($students_list as $key => $val){
+	        		echo "<option value='".$val->id."'>".$val->firstname. " ".$val->lastname."</option>";
+	        	}
+	        }
+	        ?>	
+	        </select>				
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>   
+		<button type="button" class="btn btn-primary" id='assign_to_student'><?=lang("assign_to_student")?></button>     
       </div>
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
-
 <script>
 $(document).ready(function(){
+	/** Triggers a modal to assig a user to a VM **/
 	$(".assignstudent").click(function(){
-
+		var $this = $(this);
+		var $tr = $this.parents("tr");
+		var rolename = $tr.attr("class");
 		$("#student_assign_modal").modal('show');
-
-	})
+		$("#assign_to_student").click(function(){
+			var student_id = $("#students_list").val();
+			var student_name = $("#students_list").text();
+			$("#student_assign_modal").modal('hide');
+			$.ajax({
+			  type: "POST",
+			  url: "<?=site_url("/manage/assignstudent")?>",
+			  data: { 'rolename': rolename,'studentid' : student_id },
+			  dataType : 'json'
+			}).done(function(e) {			 	
+				setMsg(e.type,e.msg);
+			 	if(e.type === "success"){
+			 		$tr.find(".td_student").html(student_name);
+			 	}
+			});
+		})
+	})	
 
 	// Stops/shutsdown a VM role
 	$(".stop").click(function(){
@@ -89,7 +110,7 @@ $(document).ready(function(){
 		setStatusMsg("stop",$tr);	
 		$.ajax({
 		  type: "POST",
-		  url: "<?=site_url("/manage/stopvm/")?>",
+		  url: "<?=site_url("/manage/stopvm")?>",
 		  data: { rolename: rolename },
 		  dataType : 'json'
 		}).done(function(e) {

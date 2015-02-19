@@ -49,7 +49,7 @@ class User extends CI_Model {
      * return all the data from the user_data table
      * return object
      */
-    public function getUserData($id){
+    public function getUser($id){
     	$query = $this->db->get_where("user_data",array("id" => $id));
 		if($query->num_rows() > 0){
 			return  $query->row();			
@@ -63,7 +63,7 @@ class User extends CI_Model {
      */
     public function createSession($userID){
 
-    	$data = $this->getUserData($userID);
+    	$data = $this->getUser($userID);
     	if($data){
     		$this->session->userid = $data->id;
     		$this->session->role = $data->role;
@@ -83,5 +83,28 @@ class User extends CI_Model {
         }
         return false;
     }
+
+    /**
+     * Assigns a student to a VM
+     * Returns an array with the result information
+     */
+    function assignStudent($rolename,$studentid){
+
+        $return = array();
+        $user = $this->getUser($studentid);
+        if($user){
+            if(empty($user->assigned_vm)){
+                $update  = array("assigned_vm" => $rolename );
+                if($this->db->update("user_data",$update,"id = ".$studentid))
+                    $return = array("type" => "success","msg" => "The student has been assigned to the virtual machine ".$rolename);
+            }else{
+                $return = array("type" => "danger","msg" => "This student already has an assigned VM");
+            }
+        }else
+            $return = array("type" => "danger","msg" => "The students was not found.");
+
+        return $return;
+    }
+
 
 }

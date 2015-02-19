@@ -33,7 +33,7 @@ class Manage extends CI_Controller{
 			$body = $result['body'];
 		}
 		$students = $this->User->getStudents();
-		
+
 		$this->template->load("main","vm",array("vms" => $body,"students_list" => $students));		
 	}
 
@@ -74,11 +74,12 @@ class Manage extends CI_Controller{
 	 * This should be called from ajax so we return a json
 	 */
 	function stopvm(){
+		$result = array();
 		if($this->input->post("rolename")){
 			$rolename  = $this->input->post("rolename");
-			$result = $this->Azure->shutdownVMRole($rolename);		
-			echo json_encode($result);
+			$result = $this->Azure->shutdownVMRole($rolename);					
 		}
+		echo json_encode($result);
 	}
 
 	/**
@@ -86,14 +87,28 @@ class Manage extends CI_Controller{
 	 * This should be called from ajax so we return a json
 	 */
 	function startvm(){
+		$result = array();
 		if($this->input->post("rolename")){
 			$rolename  = $this->input->post("rolename");
-			$result = $this->Azure->startVMRole($rolename);
-			echo json_encode($result);
+			$result = $this->Azure->startVMRole($rolename);			
 		}
+		echo json_encode($result);
 	}
 
+	/**
+	 * Assignts a VM to a student
+	 */
+	function assignstudent(){
+		
+		$rolename  = $this->input->post("rolename");
+		$studentid = $this->input->post("studentid");
+		if(!empty($rolename) && !empty($studentid) ){
+			$result = $this->User->assignStudent($rolename,$studentid);
+		}else
+			$result = array("type" => "danger","msg" => "An argument is missing on the call.");
 
+		echo json_encode($result);
+	}
 	/**
 	 * syncs all the OSimages from the api into our DB
 	 */
