@@ -9,14 +9,13 @@ class Azure extends CI_Model {
     public function __construct()
     {
         // Call the CI_Model constructor
-        parent::__construct();
-        $this->session->cloudservicename = "lti123";
-        
+        parent::__construct();            
         $this->load->library("azureRestClient",['cloudservice' => $this->session->cloudservicename,
-                                                'deploymentname' => "lti123xigq9",
+                                                'deployment' => $this->session->cloudservicename,
                                                 'subscriptionid' => AZURE_SUBSCRIPTION_ID,
                                                 'certificate' => AZURE_CERTIFICATE]);        
-        $this->initCloudService($this->session->cloudservicename);
+        //$this->initCloudService($this->session->cloudservicename);   
+        $this->cloudService = $this->session->cloudservicename;     
     }
 
     /**
@@ -26,7 +25,7 @@ class Azure extends CI_Model {
         //check if the cloudservice for the course exists if not creates it            
         if(!$this->checkCloudService($name)){                
             if($this->addCloudService($name))
-                die("Could not create cloud service ".$name); //TODO 
+                die("Could not create cloud service ".$name); //TODO fix this
         }
         $this->cloudService = $name;
     }
@@ -34,9 +33,12 @@ class Azure extends CI_Model {
      * Checks if a cloudservice exists
      */
     function checkCloudService($name){
-        $result = $this->azurerestclient->checkCloudService($name);        
-        if($result['success']) return true;
-        return false;
+        $result = $this->azurerestclient->checkCloudService($name);                
+
+        if($result['success']) 
+            return true;
+        else
+            return false;
     }
 
     /**
@@ -99,22 +101,25 @@ class Azure extends CI_Model {
         $sourceimage = $this->getSourceImageDetails($data['osimage_id']);
         if(!empty($sourceimage)){
             // if($data['numtocreate'] > 1){
+                $externalport = $this->getExternalPort();
+                $password = $this->makePassword(13);
                 $rand = $this->randString(6);
                 $add['rolename'] = $this->cloudService."-".$rand;
                 $add['hostname'] = $this->cloudService."-".$rand;
-                $add['username'] = 'admin';
-                $add['password'] = 'HolaHola1_';
+                $add['username'] = 'lti';
+                $add['password'] = $password;
                 $add['medialink'] = AZURE_MEDIALINK."vm-role-medialink-".$rand.".vhd";
                 $add['sourceimagename'] = $sourceimage['name'];
                 $add['os']    	        = strtolower($sourceimage['os']);  
-                $add['externalport'] = rand(100,50000);//TODO we have to control this better to not have duplicates
-
+                $add['externalport'] = $externalport;                   
             // }      
             //ok before we add the new VM we need to check if we have a deployment on our cloudservice            
             $deployments = $this->azurerestclient->getCloudServiceDeployments("production");            
             if($deployments['success']){                
                 $result = $this->azurerestclient->addVMRole($add);
                 if($result['success']){
+                    //we have created our virtual machine, lets save the necessary details.
+                    $this->saveVmDetails($add);
                     $return = ['type' => 'success','msg' => "VM created"];
                 }else
                     $return = ['type' => 'warning','msg' => isset($result['response']) ? $result['response'] : 'Error Creating VM Role with Deployment'];
@@ -125,6 +130,7 @@ class Azure extends CI_Model {
                 $add['label'] = $this->cloudService.$rand;                                
                 $result = $this->azurerestclient->addVMRoleDeployment($add);                
                 if($result['success']){
+                    $this->saveVmDetails($add);
                     $return = ['type' => 'success','msg' => "VM created"];
                 }else
                     $return = ['type' => 'warning','msg' => isset($result['response']) ? $result['response'] : 'Error Creating VM'];
@@ -198,7 +204,88 @@ class Azure extends CI_Model {
     }
 
     /**
-     * makes a random string to specific lenght
+     * Returns a list of all assigned virtual machines for a student
+     */     
+    function getStudentVms($userid){
+        $result = $this->db->get_where("user_vms",array("user_id" => $userid));
+        return $result->result_array();
+    }
+
+    /**
+     * Assigns a student to a VM
+     * Returns an array with the result information
+     */
+    function assignStudent($data){
+            
+        $insert = array();
+        $insert['rolename']  =  $data['rolename'];        
+        $insert['user_id']   =  $data['studentid'];
+        $insert['azure_vm_id'] = $data['azure_vm_id'];
+
+        if($this->db->insert("user_vms",$insert))
+            $return = array("type" => "success","msg" => "The student has been assigned to the virtual machine ".$rolename);
+        else
+            $return = array("type" => "danger","msg" => "An error ocurred when assigned this virtual machine to this student.");            
+       
+
+        return $return;
+    }
+
+
+    /**
+     * Saves our new virtual machine details.
+     */
+    function saveVmDetails($add){
+        $insert = array();
+        $insert['rolename'] = $add['rolename'];
+        $insert['username'] = $add['username'];
+        $insert['password'] = $add['password'];
+        $insert['externalport'] = $add['externalport'];
+        $insert['os'] = $add['os'];
+        $insert['cloudservice'] = $this->cloudService;
+        $this->db->insert("azure_vm",$insert);
+    }
+    /**
+     * Get all the vm details from virtual machines we have created.
+     * it returns this in the format of  array("rolename" => array( details ))
+     */
+    function getCreatedVmDetails(){
+
+        $result = $this->db->get_where("azure_vm",array("cloudservice" => $this->cloudService));
+        $tmp = array();
+        if($result->num_rows() > 0){            
+            foreach($result->result_array() as $v){
+                $tmp[$v['rolename']] = $v;
+            }
+        }
+
+        return $tmp;
+    }
+
+    /**
+     * gets us an external port that hastn been used for a new virtual machine
+     */
+    function getExternalPort(){
+        $result = $this->db->query("select max(externalport) as externalport from azure_vm");
+        $row = $result->row_array();
+        $cport = (int)$row['externalport'];         
+        return $cport + 1;
+    }
+
+    /**
+     * creates a password to create a windows azure virtual machine.
+     * it must contains from 6 to 72 characters, numbers , uppercaseletters and a special character.
+     */
+    function makePassword($length){
+        $alphabet = "123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPRQRSTUVWXYZ";
+          $s = "";
+            for ($i = 0; $i != $length; ++$i){
+                $s .= $alphabet[mt_rand(0, strlen($alphabet) - 1)];
+            }
+        return $s."$";
+    }
+    /**
+     * Makes a random string to specific lenght
      */
     function randString($length){
         $alphabet = "0123456789abcdefghijklmnopqrstuvwxyz";

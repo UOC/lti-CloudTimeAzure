@@ -7,12 +7,13 @@ $lang['menu_home'] = "Home";
 $lang['menu_manage'] = "Manage Azure";
 $lang['menu_students'] = "Students";
 
-$lang['vm_name'] = 'Name';
+$lang['vm_name'] = 'VM Name';
 $lang['vm_location'] = 'Location';
 $lang['vm_status'] = 'Status';
 $lang['vm_image'] = 'Image disk';
 $lang['vm_ip'] = 'Ip address';
 
+$lang['add_vm'] = "Add new VM";
 $lang['vm'] = "Virtual Machine";
 $lang['vms'] = "Virtual Machines";
 $lang['vm_add'] = "Add a new Virtual Machine";
@@ -21,6 +22,7 @@ $lang['vm_starting'] = "Starting";
 $lang['vm_stopped'] = "Stopped";
 $lang['vm_stopping'] = "Stopping";
 $lang['vm_assigned'] = "Student assigned";
+$lang['vm_connection_info'] ='Connection info';
 
 $lang['os'] = "Operating system";
 
@@ -40,3 +42,18 @@ $lang['start'] =  "Start";
 $lang['assign_to_student'] ="Assign to student";
 
 $lang['refresh_page'] ="Refresh page";
+
+//student
+$lang['my_vms'] = "My Virtual Machines";
+$lang['your_assigned_vm'] = "Your assigned Virtual Machines";
+$lang['no_vm_assigned'] = "You have no virtual machines assigned";
+$lang['no_vm_available'] = "No VM's available";
+
+$lang['connection_info'] ='Connection details';
+$lang['password'] = "Password";
+$lang['no_details'] = "Details not found";
+
+
+
+
+

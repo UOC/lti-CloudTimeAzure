@@ -15,7 +15,7 @@ class azureRestClient{
 
     function __construct($params){             
          $this->cloudServiceName = $params['cloudservice'];
-         $this->deploymentName   = $params['deploymentname'];
+         $this->deploymentName   = $params['deployment'];
          $this->subscriptionId   = $params['subscriptionid'];
          $this->certificate   = $params['certificate'];        
          $this->doConnect();
@@ -144,14 +144,12 @@ class azureRestClient{
                   </RoleList>
                 </Deployment>';         
 
-        $r = ["success" => false];    
+        $r = array("success" => false);    
         try{
             $response = $this->client->post('services/hostedservices/'.$this->cloudServiceName.'/deployments', array("body" => $body));            
             if($response->getStatusCode() == "202"){
                 $r['success'] = true;            
-            }
-
-            $r = "status_code = ".$response->getStatusCode();
+            }          
 
         }catch (RequestException $e) {
             // $r['request'] = $e->getRequest();
@@ -271,9 +269,7 @@ class azureRestClient{
             
             }catch (RequestException $e) {                    
                  $r['request'] =  $e->getRequest();        
-                 echo "<pre>";
-                 print_r($r); 
-                 echo "</pre>";        
+                     
                 if ($e->hasResponse()) {                    
                     $r['response'] = (string)$e->getResponse()->getBody();     
                 }                    

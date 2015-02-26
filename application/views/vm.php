@@ -1,30 +1,29 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
 //lets get all the users that have a role from the $students_list array
-
 if(!empty($students_list)){
 	foreach($students_list as $key => $val){
 		$options_for_students_list = "<option value='".$val->id."'>".$val->firstname. " ".$val->lastname."</option>";
 	}
 }
 
-$table = "No VM's available";
+$table = lang("no_vm_available");
 
 if(!empty($vms)){
-	
 	$table  = "<table class='table table-striped'>";
 	$table .= "<th>".lang("vm_name")."</th><th>".lang("vm_status")."</th>
 			  <th>".lang("vm_image")."</th>
 			  <th>".lang("os")."</th><th>".lang("vm_assigned")."</th><th>Actions</th>";
 
 	foreach($vms as $value){
+		$rolename = (string)$value['roleInfo']->RoleName;
 		$icon ="";
 		if($value['roleInfo']->PowerState == "Started") 
 			$icon = '<span class="glyphicon glyphicon-ok green"></span>';
 		if($value['roleInfo']->PowerState == "Stopped")
 			$icon = '<span class="glyphicon glyphicon-stop red"></span>';
 
-		$table.="<tr class='".$value['roleInfo']->RoleName."'><td>".$value['roleInfo']->RoleName."</td>				
+		$table.="<tr class='".$rolename."'><td>".$rolename."</td>				
 				<td><div class='status'>".$icon."&nbsp;&nbsp;".$value['roleInfo']->PowerState."</div></td>
 				<td>".$value['extraInfo']['body']->OSVirtualHardDisk->SourceImageName."</td>
 				<td>".$value['extraInfo']['body']->OSVirtualHardDisk->OS."</td>";
@@ -39,6 +38,18 @@ if(!empty($vms)){
 					    <li role="presentation"><a href="#" class="stop">'.lang('stop').'</a></li>
 					    <li role="presentation"><a href="#" class="start">'.lang('start').'</a></li>
 					    <li role="presentation"><a href="#" class="assignstudent">'.lang('assign_to_student').'</a></li>					    
+					    <li role="presentation">
+					    <div class="connectioninfo_'.$rolename.'" style="display:none">
+					     ';
+						if(isset($vm_details[$rolename])){
+							$role_details = $vm_details[$rolename];
+							$table .= "<p>ssh -p  ".$role_details['externalport']." ".$role_details['username']."@".$role_details['cloudservice'].".cloudapp.net</p>";
+							$table .= "<p>".lang("password").": ".$role_details['password']." </p>";
+						}else 
+							$table .= lang("no_details");			
+
+		$table .= 	    '</div>
+					    <a href="#" class="connectioninfo">'.lang('connection_info').'</a></li>					    
 					  </ul>
 					</div></td>';			
 	}
@@ -77,17 +88,47 @@ echo $table;
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+
+<!-- Modal to view the connection info to the virtual machine. -->
+<div class="modal fade" id="connection_info">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title"><?=lang("connection_info");?></h4>
+      </div>
+      <div class="modal-body">        
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>		
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
 <script>
 $(document).ready(function(){
+
+	/*triggers a modal and shows the connection info*/
+	$(".connectioninfo").click(function(){
+		var $this = $(this);
+		var $tr = $this.parents("tr");
+		var rolename = $tr.attr("class");
+		var html = $tr.find(".connectioninfo_"+rolename).html();
+		console.log(html);
+		$("#connection_info .modal-body").html(html);
+		$("#connection_info").modal('show');
+	})
+
 	/** Triggers a modal to assig a user to a VM **/
 	$(".assignstudent").click(function(){
 		var $this = $(this);
 		var $tr = $this.parents("tr");
-		var rolename = $tr.attr("class");
+		var rolename = $tr.attr("class");		
 		$("#student_assign_modal").modal('show');
 		$("#assign_to_student").click(function(){
 			var student_id = $("#students_list").val();
 			var student_name = $("#students_list").text();
+
 			$("#student_assign_modal").modal('hide');
 			$.ajax({
 			  type: "POST",
@@ -121,10 +162,8 @@ $(document).ready(function(){
 		});
 	})
 
-
 	// Starts a VM role
 	$(".start").click(function(){
-
 		var rolename = $(this).parents("tr").attr("class");
 		$tr = $("tr."+rolename);
 		setStatusMsg("start",$tr);

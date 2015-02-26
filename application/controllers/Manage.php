@@ -9,18 +9,20 @@ class Manage extends CI_Controller{
 	public function __construct(){
         // Call the CI_Model constructor
         parent::__construct();
-        $this->lang->load('general', 'english');                
+
+        //temp for tests //REMOVE
+        // $this->session->cloudservicename = "lti123";
+        // $this->session->role = "teacher";
+        // $this->session->userid = 17;
+
+        $this->lang->load('general', 'english');   
+        if($this->session->role != "teacher"){
+        	redirect("student");
+        }
     }
 
-	public function index(){
-		// $this->load->library("Azure");
-		//echo $this->azure->serviceManagement();
-		// $this->azure->createCloudService();
-		$this->template->load("main","manage",array("hej"));		
-		// $this->azure->roleInstancesStatus();
-		//$this->azurerestclient->listLocations();
-		// $this->azurerestclient->getCLoudServices();
-		// $this->azurerestclient->getVM();
+	public function index(){		
+		$this->template->load("main","manage",array());				
 	}	
 
 	/**
@@ -33,8 +35,11 @@ class Manage extends CI_Controller{
 			$body = $result['body'];
 		}
 		$students = $this->User->getStudents();
-
-		$this->template->load("main","vm",array("vms" => $body,"students_list" => $students));		
+		$vm_details = $this->Azure->getCreatedVmDetails();//get the details that we have in our db about the created vm
+		$this->template->load("main","vm",array("vms" => $body,
+												"students_list" => $students,
+												"vm_details" => $vm_details));		
+		
 	}
 
 	/**
@@ -100,14 +105,18 @@ class Manage extends CI_Controller{
 	 */
 	function assignstudent(){
 		
-		$rolename  = $this->input->post("rolename");
-		$studentid = $this->input->post("studentid");
-		if(!empty($rolename) && !empty($studentid) ){
-			$result = $this->User->assignStudent($rolename,$studentid);
+		$insert = array();
+		$insert['rolename']  = $this->input->post("rolename");
+		$insert['user_id']   = $this->input->post("studentid");				
+		
+		$user = $this->User->getUser($studentid);
+		// $vminfo = $this->Azure->;
+        if($user){            
+        	$return = $this->Azure->assignStudent($rolename,$studentid,$connectiondetails);
 		}else
-			$result = array("type" => "danger","msg" => "An argument is missing on the call.");
-
-		echo json_encode($result);
+            $return = array("type" => "danger","msg" => "The students was not found.");			
+		
+		echo json_encode($return);
 	}
 	/**
 	 * syncs all the OSimages from the api into our DB

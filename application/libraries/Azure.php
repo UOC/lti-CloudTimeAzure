@@ -88,9 +88,7 @@ class Azure {
 			$hosted_services = $listHostedServicesResult->getHostedServices();
 
 			foreach($hosted_services as $hosted_service){
-				echo "<pre>";
-				print_r($hosted_service);
-				echo "</pre>";
+				
 				// echo "Deployment";
 			    // echo "Service name: ".$hosted_service->getName()."<br />";
 			    // echo "Management URL: ".$hosted_service->getUrl()."<br />";
@@ -114,14 +112,11 @@ class Azure {
 	try{
 			$serviceRuntimRestProxy = ServicesBuilder::getInstance()->createServiceManagementService($this->connectionString);
 		    $listRoles = $serviceRuntimRestProxy->getRoles();
-		    print_r($listRoles);
-		    exit;
+		    
 			$hosted_services = $listHostedServicesResult->getHostedServices();
 
 			foreach($hosted_services as $hosted_service){
-				echo "<pre>";
-				print_r($hosted_service);
-				echo "</pre>";
+				
 				// echo "Deployment";
 			    // echo "Service name: ".$hosted_service->getName()."<br />";
 			    // echo "Management URL: ".$hosted_service->getUrl()."<br />";

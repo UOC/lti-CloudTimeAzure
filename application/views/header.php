@@ -11,11 +11,17 @@
       <a class="navbar-brand" href="#"><img src="<?=base_url('/assets/img/marca_UOC_blanc_paper_small.png')?>"></a>
     </div>    
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+    <?php if($this->session->role == "teacher"){ ?>
       <ul class="nav navbar-nav">                
-        <li><a href="<?=site_url('/manage/vm_add')?>">Add Virtual Machines</a></li>            
-            <li><a href="<?=site_url('/manage/vm')?>">List VM</a></li>            
-            <li><a href="<?=site_url('/manage/os_images')?>">List OS Images</a></li>         
+        <li><a href="<?=site_url('/manage/vm_add')?>"><?=lang("add_vm")?></a></li>            
+        <li><a href="<?=site_url('/manage/vm')?>"><?=lang("vms")?></a></li>            
+        <li><a href="<?=site_url('/manage/os_images')?>"><?=lang("osimages")?></a></li>         
       </ul>         
+    <?php }else{ ?> 
+     <ul class="nav navbar-nav">                
+          <li><a href="<?=site_url('/student')?>"><?=lang("my_vms")?></a></li>
+      </ul>   
+    <?php } ?>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->
 </nav>

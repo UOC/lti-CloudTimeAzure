@@ -29,17 +29,17 @@ class User extends CI_Model {
      * adds the user to the user_data 
      * returns true/false
      */
-    public function add($data){
-    	if(!$this->userExists($data['consumer'],$data['context_id'],$data['user_id'])){
+    public function add($data){        
+    	if(!$this->userExists($data['user_id'],$data['consumer_info_id'])){
     		$add = array();    		
     		$add['firstname'] = $data['firstname'];
     		$add['lastname'] = $data['lastname'];
     		$add['email'] = $data['email'];
     		$add['lang']  = $data['lang'];
     		$add['role']  = $data['is_teacher'] ? 'teacher' : 'student';
-    		$add['consumer'] = $data['consumer'];
-    		$add['context_id'] = $data['context_id'];
-    		$add['lti_user_id'] = $data['lti_user_id'];
+    		$add['consumer_info_id'] = $data['consumer_info_id'];    		
+    		$add['lti_user_id'] = $data['user_id'];
+            $add['created'] = date("Y-m-d H:i:s");
     		return $this->db->insert("user_data",$add);
      	}
      	return true;//it was already there
@@ -84,27 +84,7 @@ class User extends CI_Model {
         return false;
     }
 
-    /**
-     * Assigns a student to a VM
-     * Returns an array with the result information
-     */
-    function assignStudent($rolename,$studentid){
-
-        $return = array();
-        $user = $this->getUser($studentid);
-        if($user){
-            if(empty($user->assigned_vm)){
-                $update  = array("assigned_vm" => $rolename );
-                if($this->db->update("user_data",$update,"id = ".$studentid))
-                    $return = array("type" => "success","msg" => "The student has been assigned to the virtual machine ".$rolename);
-            }else{
-                $return = array("type" => "danger","msg" => "This student already has an assigned VM");
-            }
-        }else
-            $return = array("type" => "danger","msg" => "The students was not found.");
-
-        return $return;
-    }
+    
 
 
 }

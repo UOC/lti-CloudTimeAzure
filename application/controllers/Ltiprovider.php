@@ -37,23 +37,33 @@ class Ltiprovider extends CI_Controller{
 		$userdata['context_id'] = $_REQUEST['context_id'];
 		// $userdata['launch_presentation_locale'] = $_REQUEST['launch_presentation_locale'];
 		$userdata['consumer_key'] = $tool_provider->consumer->getKey();
+		$userdata['lang'] ='es';
 		
-		$nameForCloudService = "lti123";
+		//this will be the name of our cloudservice that will be used in windows azure aswel as the name of our deployment
+		//This field can contain only letters, numbers, and hyphens. The first and last character in the field must be a letter or number. 
+		$cleanConsumerKey = preg_replace("/[^a-zA-Z0-9]+/", "", $userdata['consumer_key']);
+		$nameForCloudService = "lti".$userdata['context_id']."-".$cleanConsumerKey;
 
 		//we will save the consumer_key and context_id on a table
 		$consumer_info = $this->Lti->getConsumer($userdata['consumer_key'],$userdata['context_id']);
 		if( !$consumer_info ){
 			//if is not added , then we can create it.
-			$consumer_info = $this->Lti->addConsumer($userdata['consumer_key'],$userdata['context_id']);
+			$consumer_info_id = $this->Lti->addConsumer($userdata['consumer_key'],$userdata['context_id']);
 			// TODO - send to error if not created			
-		}
+		}else
+		$consumer_info_id = $consumer_info['id'];
 
 		if(!$consumer_info) die("Error: Couldn't add consumer info."); //we need this to continue
 
-		$userdata['consumer_info_id'] = $consumer_info->id;
+		$userdata['consumer_info_id'] = $consumer_info_id;
 
-		if($tool_provider->user->isAdmin() || $tool_provider->user->isStaff()){
-			$userdata['is_teacher'] = true;
+		$this->session->cloudservicename = $nameForCloudService;
+		//out deploymentname will be the same as the cloudservice name
+		$this->session->deployment = $nameForCloudService;
+		
+
+		if($tool_provider->user->isAdmin() || $tool_provider->user->isStaff()){	
+			$userdata['is_teacher'] = true;			
 			//lets check if there is a cloudservice for this course
 			if(!$this->Azure->checkCloudService($nameForCloudService)){
 				if( !$this->Azure->addCloudService($nameForCloudService)){
@@ -63,18 +73,25 @@ class Ltiprovider extends CI_Controller{
 		}else{
 			$userdata['is_teacher'] = false;
 		}		
+		
 
-		$userId = $this->User->userExists($userdata['user_id'],$consumer_info->id);
+		$userId = $this->User->userExists($userdata['user_id'],$consumer_info_id);
+
 		if(!$userId){
 			$userId = $this->User->add($userdata);
-		}
-		$this->session->cloudservicename = $nameForCloudService;
+		}		
+
 		//is all ok lets create the session for the user
 		if($userId){			
-		 	if($this->User->createSession($userId))
-		 		redirect('/manage');
-		 	else
+		 	if($this->User->createSession($userId)){		 		
+		 		if($userdata['is_teacher'])
+		 			redirect('/manage/vm');
+		 		else
+		 			redirect('/student');
+		 	}
+		 	else{
 		 		die('Could not create session');
+		 	}
 		}
 
 		die('Could not add user');
