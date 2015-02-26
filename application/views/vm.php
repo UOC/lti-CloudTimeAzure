@@ -69,6 +69,7 @@ echo $table;
       </div>
       <div class="modal-body">
         <form>
+        <input type='hidden' name='sa_rolename'  id='sa_rolename' value=''>
 	        <!-- Lists of all the students without a vm	 -->
 	        <select id='students_list' name='student_list' class="form-control">
 	        <?php
@@ -113,8 +114,7 @@ $(document).ready(function(){
 		var $this = $(this);
 		var $tr = $this.parents("tr");
 		var rolename = $tr.attr("class");
-		var html = $tr.find(".connectioninfo_"+rolename).html();
-		console.log(html);
+		var html = $tr.find(".connectioninfo_"+rolename).html();		
 		$("#connection_info .modal-body").html(html);
 		$("#connection_info").modal('show');
 	})
@@ -124,11 +124,16 @@ $(document).ready(function(){
 		var $this = $(this);
 		var $tr = $this.parents("tr");
 		var rolename = $tr.attr("class");		
-		$("#student_assign_modal").modal('show');
-		$("#assign_to_student").click(function(){
+		$("#student_assign_modal").modal('show');	
+		$("#sa_rolename").val(rolename);
+	})	
+
+
+	$("#assign_to_student").click(function(){
+			var $this = $(this);
 			var student_id = $("#students_list").val();
 			var student_name = $("#students_list").text();
-
+			var rolename = $("#sa_rolename").val();
 			$("#student_assign_modal").modal('hide');
 			$.ajax({
 			  type: "POST",
@@ -141,8 +146,9 @@ $(document).ready(function(){
 			 		$tr.find(".td_student").html(student_name);
 			 	}
 			});
-		})
-	})	
+	});
+
+
 
 	// Stops/shutsdown a VM role
 	$(".stop").click(function(){

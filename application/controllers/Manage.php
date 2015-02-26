@@ -107,12 +107,14 @@ class Manage extends CI_Controller{
 		
 		$insert = array();
 		$insert['rolename']  = $this->input->post("rolename");
-		$insert['user_id']   = $this->input->post("studentid");				
+		$insert['user_id']   = $this->input->post("studentid");		
+		$azureRoleDetails = $this->Azure->getAzureRoleDetails($insert['rolename']);
+		$insert['azure_vm_id'] = $azureRoleDetails['id'];
 		
-		$user = $this->User->getUser($studentid);
+		$user = $this->User->getUser($insert['user_id']);
 		// $vminfo = $this->Azure->;
         if($user){            
-        	$return = $this->Azure->assignStudent($rolename,$studentid,$connectiondetails);
+        	$return = $this->Azure->assignStudent($insert);
 		}else
             $return = array("type" => "danger","msg" => "The students was not found.");			
 		

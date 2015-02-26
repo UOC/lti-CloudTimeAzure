@@ -219,11 +219,11 @@ class Azure extends CI_Model {
             
         $insert = array();
         $insert['rolename']  =  $data['rolename'];        
-        $insert['user_id']   =  $data['studentid'];
+        $insert['user_id']   =  $data['user_id'];
         $insert['azure_vm_id'] = $data['azure_vm_id'];
 
         if($this->db->insert("user_vms",$insert))
-            $return = array("type" => "success","msg" => "The student has been assigned to the virtual machine ".$rolename);
+            $return = array("type" => "success","msg" => "The student has been assigned to the virtual machine ".$insert['rolename']);
         else
             $return = array("type" => "danger","msg" => "An error ocurred when assigned this virtual machine to this student.");            
        
@@ -245,6 +245,15 @@ class Azure extends CI_Model {
         $insert['cloudservice'] = $this->cloudService;
         $this->db->insert("azure_vm",$insert);
     }
+
+    /**
+     * Get the details from a created virtual machine that is on azure_vm db table
+     */
+    function getAzureRoleDetails($rolename){
+        $result = $this->db->get_where("azure_vm",array("rolename" => $rolename));
+        return $result->row_array();    
+    }
+
     /**
      * Get all the vm details from virtual machines we have created.
      * it returns this in the format of  array("rolename" => array( details ))
