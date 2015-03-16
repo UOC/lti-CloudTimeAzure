@@ -1,8 +1,6 @@
 { 
 	"require": 
-	{ 
-		"microsoft/windowsazure": "*",
+	{ 		
 		"guzzlehttp/guzzle": "~5.0"
-	},
-	"repositories": [ { "type": "pear", "url": "http://pear.php.net" } ], "minimum-stability": "dev" 
+	}
 }

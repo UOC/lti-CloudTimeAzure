@@ -12,6 +12,7 @@ class Ltiprovider extends CI_Controller{
 
 	public function __construct(){ 		
 		parent::__construct();
+		
 	}
 
 	public function index(){		
@@ -37,7 +38,7 @@ class Ltiprovider extends CI_Controller{
 		$userdata['context_id'] = $_REQUEST['context_id'];
 		// $userdata['launch_presentation_locale'] = $_REQUEST['launch_presentation_locale'];
 		$userdata['consumer_key'] = $tool_provider->consumer->getKey();
-		$userdata['lang'] ='es';
+		$userdata['lang'] ='english';
 		
 		//this will be the name of our cloudservice that will be used in windows azure aswel as the name of our deployment
 		//This field can contain only letters, numbers, and hyphens. The first and last character in the field must be a letter or number. 
@@ -57,10 +58,11 @@ class Ltiprovider extends CI_Controller{
 
 		$userdata['consumer_info_id'] = $consumer_info_id;
 
+		/** Session variables we need for the application to work **/
 		$this->session->cloudservicename = $nameForCloudService;
-		//out deploymentname will be the same as the cloudservice name
+		//out deploymentname will be the same as the cloudservice name for now
 		$this->session->deployment = $nameForCloudService;
-		
+		$this->session->lang = $userdata['lang'];	
 
 		if($tool_provider->user->isAdmin() || $tool_provider->user->isStaff()){	
 			$userdata['is_teacher'] = true;			

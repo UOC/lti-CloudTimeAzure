@@ -1,4 +1,5 @@
 <?php
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 /**
  * Manages windows azure 
  * UOC 2015 - Victor Castillo ( victor@tresipunt.com )
@@ -9,13 +10,7 @@ class Manage extends CI_Controller{
 	public function __construct(){
         // Call the CI_Model constructor
         parent::__construct();
-
-        //temp for tests //REMOVE
-        // $this->session->cloudservicename = "lti123";
-        // $this->session->role = "teacher";
-        // $this->session->userid = 17;
-
-        $this->lang->load('general', 'english');   
+        $this->lang->load('general', $this->session->lang);   
         if($this->session->role != "teacher"){
         	redirect("student");
         }
@@ -123,7 +118,7 @@ class Manage extends CI_Controller{
 	/**
 	 * syncs all the OSimages from the api into our DB
 	 */
-	function import_osmages(){
+	function import_osimages(){
 		echo $this->Azure->importOSImages();
 	}
 	

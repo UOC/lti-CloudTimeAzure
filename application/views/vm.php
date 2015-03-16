@@ -16,6 +16,7 @@ if(!empty($vms)){
 			  <th>".lang("os")."</th><th>".lang("vm_assigned")."</th><th>Actions</th>";
 
 	foreach($vms as $value){
+		
 		$rolename = (string)$value['roleInfo']->RoleName;
 		$icon ="";
 		if($value['roleInfo']->PowerState == "Started") 
@@ -106,6 +107,8 @@ echo $table;
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
+
+
 <script>
 $(document).ready(function(){
 
@@ -128,7 +131,6 @@ $(document).ready(function(){
 		$("#sa_rolename").val(rolename);
 	})	
 
-
 	$("#assign_to_student").click(function(){
 			var $this = $(this);
 			var student_id = $("#students_list").val();
@@ -147,7 +149,6 @@ $(document).ready(function(){
 			 	}
 			});
 	});
-
 
 
 	// Stops/shutsdown a VM role

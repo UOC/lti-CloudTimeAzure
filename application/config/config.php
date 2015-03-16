@@ -17,7 +17,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | environments.
 |
 */
-$config['base_url'] = 'http://uoc.dev/lticloudtimeazure';
+$config['base_url'] = '';
 
 /*
 |--------------------------------------------------------------------------
