@@ -28,6 +28,8 @@ Database
 """"""""
   Database configuration file is found in application/config/database.php
   for more info about this please check `codeigniter <http://www.codeigniter.com/userguide3>`_
+  
+  Once you have your database set up you must import the database_structure.sql file to create the tables.
 
 Windows Azure
 """""""""""""
